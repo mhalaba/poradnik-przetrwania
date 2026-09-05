@@ -32,26 +32,29 @@ cd /Users/tas/szkolenie && python3 -m http.server 8765
 
 Potem otwórz http://localhost:8765 (gra wymaga uruchomienia przez `http://`, nie przez `file://`, bo ładuje Three.js z CDN).
 
-## Wdrożenie na poradnik.punktodpornosci.pl (home.pl)
+## Gdzie strona stoi i jak ją aktualizować
 
-Domena `punktodpornosci.pl` jest utrzymywana w home.pl (serwery nazw `dns.home.pl`), a subdomena `poradnik` już rozwiązuje się na ten sam adres IP. Brakuje tylko konfiguracji po stronie serwera.
+Strona działa pod adresem **https://poradnik.punktodpornosci.pl** na **GitHub Pages**, z repozytorium [mhalaba/poradnik-przetrwania](https://github.com/mhalaba/poradnik-przetrwania). Hosting i certyfikat Let's Encrypt są bezpłatne, certyfikat odnawia się sam.
 
-1. **Utwórz subdomenę.** Panel home.pl → Domeny → `punktodpornosci.pl` → Subdomeny → dodaj `poradnik` i wskaż nowy katalog, na przykład `/poradnik`.
-2. **Wystaw certyfikat SSL.** W panelu włącz bezpłatny certyfikat dla `poradnik.punktodpornosci.pl` i wymuś przekierowanie na HTTPS. Bez tego przeglądarki pokażą ostrzeżenie, a AdSense nie wyświetli reklam.
-3. **Wgraj pliki.** Przez FTP lub menedżer plików skopiuj całą zawartość tego katalogu do katalogu subdomeny: `index.html`, `szkolenie.html`, `gra.html`, `og.png`, `robots.txt`, `sitemap.xml`, `ads.txt` i cały folder `assets`.
-4. **Skopiuj `ads.txt` także do katalogu głównego domeny.** To ważne: Google czyta plik `ads.txt` z domeny głównej, czyli z `https://punktodpornosci.pl/ads.txt`, a nie z subdomeny. Dziś ten adres zwraca błąd 404. Jeśli w przyszłości podepniesz AdSense również do strony głównej, dopisuj kolejne linie zamiast nadpisywać plik.
-5. **Sprawdź trzy adresy** po wgraniu: strona główna, `/ads.txt` na domenie głównej i `/sitemap.xml` na subdomenie.
-6. **Zgłoś witrynę.** W AdSense dodaj `poradnik.punktodpornosci.pl`. W Google Search Console dodaj tę samą subdomenę jako osobny zasób i prześlij mapę witryny `https://poradnik.punktodpornosci.pl/sitemap.xml`.
-7. **Podlinkuj z głównej strony.** Warto dodać odnośnik z `punktodpornosci.pl` do poradnika, żeby Google szybciej znalazł nową subdomenę. W przeciwną stronę odnośnik jest już w stopce.
+Aktualizacja strony to jedno polecenie:
 
-Alternatywy, jeśli nie chcesz obciążać home.pl: Netlify (przeciągnij folder na netlify.com/drop), Cloudflare Pages, GitHub Pages. W każdej z nich wskazujesz subdomenę rekordem CNAME w panelu DNS home.pl.
+```bash
+git add -A && git commit -m "aktualizacja" && git push
+```
 
-### Co jest przygotowane pod tę domenę
+Zmiany pojawiają się na żywo po około minucie.
 
-- Adresy kanoniczne i znaczniki Open Graph oraz Twitter na wszystkich trzech stronach.
-- `og.png` w rozmiarze 1200 na 630 pikseli, czyli obrazek widoczny przy udostępnianiu linku na Facebooku, LinkedIn i w komunikatorach.
-- `robots.txt` z odnośnikiem do mapy witryny, przyjazny wyszukiwarkom i modelom językowym, w tej samej konwencji co plik na stronie głównej.
-- `sitemap.xml` z pięcioma adresami: strona główna oraz szkolenie i gra w obu wersjach.
+### Jak to jest połączone
+
+- Domena `punktodpornosci.pl` jest utrzymywana w home.pl. Subdomena `poradnik` ma tam cztery rekordy A wskazujące na serwery GitHub Pages: 185.199.108.153, 185.199.109.153, 185.199.110.153, 185.199.111.153.
+- Plik `CNAME` w repozytorium mówi GitHubowi, pod jaką domeną ma serwować stronę. Nie usuwaj go.
+- Wymuszone jest HTTPS, więc adresy `http://` przekierowują na `https://` kodem 301.
+- Plik `ads.txt` leży dodatkowo w katalogu głównej strony w home.pl, bo Google czyta go z domeny głównej: `https://punktodpornosci.pl/ads.txt`.
+- W home.pl zostały nieużywane kopie plików w katalogu `/public_html/poradnik` oraz subdomena przypisana do serwera. Nie przeszkadzają, bo DNS kieruje ruch na GitHub. Możesz je usunąć, gdy uznasz wdrożenie za stabilne.
+
+### Gdyby trzeba było wrócić na home.pl
+
+Wystarczy w panelu home.pl zmienić cztery rekordy A subdomeny z powrotem na adres 46.242.242.147. Pliki tam czekają.
 
 ## Po edycji plików podbij numer wersji
 
