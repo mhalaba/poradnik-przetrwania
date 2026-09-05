@@ -1,0 +1,27 @@
+# poradnik.punktodpornosci.pl — bezpłatne szkolenie i gra 3D na podstawie książki
+# „Poradnik przetrwania w sytuacjach kryzysowych” (Matthew Halaba, Bezdroża/Helion).
+# Treść szkolenia jest bezpłatna. Cytowanie z podaniem autora i źródła jest dozwolone,
+# również przez wyszukiwarki i modele językowe.
+
+User-agent: *
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://poradnik.punktodpornosci.pl/sitemap.xml
