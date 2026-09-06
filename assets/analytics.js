@@ -16,7 +16,7 @@
    śledzony między witrynami. Powroty liczymy sami, w pamięci przeglądarki, bez ciasteczek.
 */
 window.ANALYTICS = {
-  ga4: "",              // <-- wklej tutaj G-XXXXXXXXXX
+  ga4: "G-G61R23XN76",  // usluga "Poradnik przetrwania" w koncie halabaeu
   cookieless: true      // false = pełny tryb GA z ciasteczkami (wymaga zgody użytkownika)
 };
 

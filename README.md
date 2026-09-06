@@ -62,7 +62,7 @@ Cały pomiar przechodzi przez jedną funkcję `window.track(nazwa, dane)` z plik
 
 **Podgląd bez konta.** Dopisz `?debug=1` do adresu dowolnej strony. Zdarzenia wypiszą się w konsoli i w małym oknie w rogu ekranu. Przykład: `https://poradnik.punktodpornosci.pl/gra.html?wersja=dzieci&debug=1`
 
-**Włączenie Google Analytics.** W panelu Analytics utwórz usługę i strumień danych dla adresu strony, skopiuj identyfikator w formacie `G-XXXXXXXXXX` i wklej go w `assets/analytics.js` w polu `ga4`. Nic więcej nie trzeba zmieniać.
+**Google Analytics jest podpięty.** Usługa „Poradnik przetrwania” w koncie halabaeu, identyfikator `G-G61R23XN76`, wpisany w `assets/analytics.js` w polu `ga4`. Raporty: analytics.google.com, zdarzenia widać w podglądzie na żywo po kilku minutach od wejścia na stronę.
 
 **Mierzone zdarzenia**
 
