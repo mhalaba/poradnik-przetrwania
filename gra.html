@@ -21,7 +21,7 @@
 <meta name="twitter:title" content="Gra 3D „Miasteczko” – Poradnik przetrwania">
 <meta name="twitter:description" content="Dziewiętnaście misji przetrwania w polskim miasteczku 3D: spakuj plecak na 72 godziny, rozpoznaj syrenę, uciekaj przed powodzią, złap fake newsa. Wersja dla dzieci i dorosłych.">
 <meta name="twitter:image" content="https://poradnik.punktodpornosci.pl/og.png">
-<link rel="stylesheet" href="assets/style.css?v=9">
+<link rel="stylesheet" href="assets/style.css?v=10">
 <link rel="icon" type="image/png" href="assets/logo.png?v=10">
 <link rel="apple-touch-icon" href="assets/logo.png?v=10">
 <style>
@@ -29,6 +29,7 @@
   #c{position:fixed;left:0;top:0;display:block;width:100vw;height:100vh;touch-action:none}
   .hud{position:fixed;left:0;right:0;top:0;padding:10px 12px;display:flex;gap:6px;align-items:center;z-index:5;pointer-events:none;flex-wrap:wrap;max-width:calc(100% - 230px)}
   .hud > *{pointer-events:auto}
+  [hidden]{display:none !important}
   .pill{background:rgba(11,18,32,.72);color:#fff;border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:6px 12px;font-weight:700;font-size:.86rem;backdrop-filter:blur(8px);box-shadow:0 4px 14px rgba(0,0,0,.25);white-space:nowrap;transition:border-color .2s,transform .12s}
   button.pill:hover,a.pill:hover{transform:translateY(-1px);border-color:var(--accent)}
   body.kids .pill{background:rgba(255,255,255,.88);color:#2b2140;border-color:#ffd7a3}
@@ -98,6 +99,7 @@
 
 <div class="hud">
   <a class="pill" href="index.html" style="text-decoration:none">🛡️ Poradnik</a>
+  <a class="pill" href="#" data-zgoda hidden style="text-decoration:none">🔒 Prywatność</a>
   <span class="pill" id="scorePill">⭐ 0</span>
   <span class="pill" id="missionPill">🎯 0/19</span>
   <span class="pill" id="modePill"></span>
@@ -120,10 +122,10 @@
 <div id="panel"><div class="box" id="panelBox"></div></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="assets/analytics.js?v=9"></script>
-<script src="assets/content.js?v=9"></script>
-<script src="assets/content-kids.js?v=9"></script>
-<script src="assets/game.js?v=9"></script>
-<script src="assets/ads.js?v=9"></script>
+<script src="assets/analytics.js?v=10"></script>
+<script src="assets/content.js?v=10"></script>
+<script src="assets/content-kids.js?v=10"></script>
+<script src="assets/game.js?v=10"></script>
+<script src="assets/ads.js?v=10"></script>
 </body>
 </html>

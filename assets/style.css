@@ -111,3 +111,5 @@ footer a{color:var(--accent)}
 .kids-emoji{font-size:3rem;line-height:1}
 .kid-intro{display:flex;gap:16px;align-items:flex-start}
 @media(max-width:600px){.kid-intro{flex-direction:column}}
+
+[hidden]{display:none !important}

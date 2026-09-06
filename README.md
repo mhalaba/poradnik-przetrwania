@@ -83,10 +83,10 @@ Powroty liczone są lokalnie w przeglądarce, bez ciasteczek. Analytics startuje
 
 ## Po edycji plików podbij numer wersji
 
-Odwołania do plików w `assets/` mają na końcu `?v=` i numer (obecnie `?v=9`, favikona `?v=10`). Po każdej zmianie w `assets/` podnieś ten numer we wszystkich trzech plikach HTML, na przykład:
+Odwołania do plików w `assets/` mają na końcu `?v=` i numer (obecnie `?v=10`). Po każdej zmianie w `assets/` podnieś ten numer we wszystkich trzech plikach HTML, na przykład:
 
 ```bash
-sed -i '' 's/?v=9/?v=10/g' index.html szkolenie.html gra.html
+sed -i '' 's/?v=10/?v=11/g' index.html szkolenie.html gra.html
 ```
 
 Bez tego przeglądarki odwiedzających będą jeszcze przez jakiś czas używać starych, zapisanych w pamięci podręcznej wersji.
@@ -121,8 +121,14 @@ Komunikat wyświetla się przez skrypt AdSense, który jest w `<head>` każdej s
 aktualizuje tryb zgody Google. Do czasu zgody `assets/analytics.js` trzyma wszystkie sygnały
 na „denied”, więc Analytics działa bez ciasteczek.
 
-Do zrobienia po stronie serwisu głównego: strona `punktodpornosci.pl/prywatnosc` powinna
-dostać akapit o Google Analytics, AdSense i plikach cookie.
+Na każdej stronie jest link „Ustawienia prywatności” (w grze pigułka „🔒 Prywatność”), który
+otwiera okno zgody ponownie. Link jest ukryty (`hidden`) i pokazuje się tylko wtedy, gdy Google
+faktycznie załadował komunikat, czyli w Europejskim Obszarze Gospodarczym. Obsługę robi
+`window.ustawieniaPrywatnosci()` w `assets/analytics.js`.
+
+**Do zrobienia po stronie serwisu głównego:** strona `punktodpornosci.pl/prywatnosc` twierdzi
+dziś, że serwis nie używa cookies do analityki ani reklamy. Dla subdomeny `poradnik.` to już
+nieprawda, więc tekst trzeba poprawić. Gotowy tekst do wklejenia dostałeś osobno.
 
 ## Link do książki
 

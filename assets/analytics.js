@@ -87,5 +87,37 @@ window.ANALYTICS = {
     localStorage.setItem(KEY, JSON.stringify(w));
   } catch(e){}
 
+  /* --- ponowne otwarcie okna zgody Google (link „Ustawienia prywatności”) --- */
+  window.ustawieniaPrywatnosci = function(){
+    try {
+      window.googlefc = window.googlefc || {};
+      window.googlefc.callbackQueue = window.googlefc.callbackQueue || [];
+      window.googlefc.callbackQueue.push({ CONSENT_DATA_READY: function(){
+        try { window.googlefc.showRevocationMessage(); } catch(e){}
+      }});
+    } catch(e){}
+  };
+
+  /* Link pokazujemy tylko tam, gdzie Google faktycznie pyta o zgodę, czyli w EOG.
+     Poza EOG komunikat się nie ładuje i link byłby martwy. */
+  (function(){
+    function wire(){
+      const linki = document.querySelectorAll('[data-zgoda]');
+      if (!linki.length) return;
+      let proby = 0;
+      const tik = setInterval(function(){
+        proby++;
+        if (window.googlefc) {
+          clearInterval(tik);
+          linki.forEach(function(a){
+            a.hidden = false;
+            a.addEventListener('click', function(e){ e.preventDefault(); window.ustawieniaPrywatnosci(); });
+          });
+        } else if (proby > 40) { clearInterval(tik); }
+      }, 250);
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire); else wire();
+  })();
+
   if (DEBUG) window.track('podglad_wlaczony', { ga4: ok ? 'skonfigurowane' : 'brak' });
 })();
