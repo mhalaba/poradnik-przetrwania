@@ -107,6 +107,22 @@ function tree(x,z,s=1){ const t=new THREE.Mesh(new THREE.CylinderGeometry(.25*s,
 function lamp(x,z){ box(.22,6,.22,0x484d55,x,3,z); const l=new THREE.Mesh(new THREE.SphereGeometry(.45,10,8),new THREE.MeshBasicMaterial({color:0xfff2b0})); l.position.set(x,6.2,z); world.add(l); return l; }
 function building(w,h,d,c,x,z,label,map){ const b=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),M(c,map?{map}:{})); b.position.set(x,h/2,z); b.castShadow=true; b.receiveShadow=true; world.add(b); solids.push(b); const roof=new THREE.Mesh(new THREE.BoxGeometry(w+.6,.5,d+.6),M(0x555)); roof.position.set(x,h+.25,z); world.add(roof); colliders.push({x:x-w/2-.5,z:z-d/2-.5,w:w+1,d:d+1}); if(label) makeLabel(label,x,h+2.5,z,1,undefined,110); return b; }
 
+/* ---------- DODATKOWE GRY W MIASTECZKU ----------
+   Dwa obiekty prowadzą do osobnych gier: karetka pod ratownictwo, hala-drukarka pod druk 3D.
+   Wpisz adres, pod którym dana gra stoi w internecie. Dopóki pole jest puste, obiekt stoi
+   w miasteczku i tłumaczy, że gra jeszcze nie ruszyła – nikt nie trafia w martwy link. */
+const GRY={
+  akademia112:{ key:'akademia112', url:'', x:50, z:30, r:4.6, btn:'🚑 Akademia 112',
+    tytul:'🚑 Akademia 112',
+    opis:'Osobna gra o pierwszej pomocy i bezpieczeństwie. Uczysz się rozpoznać zatrzymanie krążenia, uciskać klatkę w rytmie 100–120 na minutę, zatamować krwotok, zachować się przy podejrzanej paczce i przy dymie w budynku. Są też sygnały alarmowe i ewakuacja. Dla dzieci 10–14 lat, do grania razem.',
+    cta:'Wsiadam do karetki →' },
+  dysza:{ key:'akademia_dyszy', url:'', x:24, z:-46, r:6.2, btn:'🖨️ Akademia Dyszy',
+    tytul:'🖨️ Akademia Dyszy',
+    opis:'Osobna gra-kampus o druku 3D. Lekcje o drukarce, filamencie, fizyce i matematyce wydruku, laboratoria (zużycie nitki, wysokość warstwy, skala, układ współrzędnych), quizy, egzamin i dyplom. Dla uczniów 10–14 lat, program STEAM.',
+    cta:'Wchodzę do hali →' }
+};
+const AMB=GRY.akademia112, DYSZA=GRY.dysza;
+
 const HOME=[-20,-30];
 house(HOME[0],HOME[1],0,P.wall,P.roof,1,T('Dom Nowaków','Twój dom'));
 house(-36,-30,0,P.wall2,P.roof2,.9,T('Pani Krysia (82 l.)','Pani Krysia'));
@@ -126,6 +142,51 @@ box(1.5,16,1.5,0x666,0,8,-75); box(3,1.5,3,0xff3d3d,0,16.5,-75); makeLabel('SYRE
 building(10,6,8,0x777788,-75,-10,'STACJA ENERGETYCZNA'); box(1.2,14,1.2,0x555,-79,7,-6); box(1.2,14,1.2,0x555,-71,7,-6);
 building(10,4,6,KIDS?0xffe0b2:0x8f7f6f,72,45,'KAFEJKA / WI-FI'); box(.8,18,.8,0x999,72,9,45);
 const car=new THREE.Group(); { const cb=new THREE.Mesh(new THREE.BoxGeometry(4.2,1.2,2),M(KIDS?0x4fc3f7:0x8a1c2b,{roughness:.4,metalness:.3})); cb.position.y=.9; cb.castShadow=true; car.add(cb); const ct=new THREE.Mesh(new THREE.BoxGeometry(2.4,1,1.8),M(0x9fd0ff,{roughness:.2})); ct.position.set(-.2,1.9,0); car.add(ct); [[1.4,.9],[-1.4,.9],[1.4,-.9],[-1.4,-.9]].forEach(([x,z])=>{ const w=new THREE.Mesh(new THREE.CylinderGeometry(.45,.45,.4,12),M(0x222)); w.rotation.x=Math.PI/2; w.position.set(x,.45,z); car.add(w);}); car.position.set(-12,0,-24); world.add(car); colliders.push({x:-14.5,z:-25.5,w:5,d:3}); }
+/* ---------- KARETKA: wejście do gry „Akademia 112” ---------- */
+const ambLights=[];
+{ const g=new THREE.Group();
+  const t112=tex(256,128,(c,w,h)=>{ c.fillStyle='#f4f7fa'; c.fillRect(0,0,w,h); c.fillStyle='#d62828'; c.fillRect(0,h*.66,w,h*.14); c.fillStyle='#0b1b2e'; c.font='bold 74px Inter, Nunito, sans-serif'; c.textAlign='center'; c.textBaseline='middle'; c.fillText('112',w/2,h*.36); });
+  const body=new THREE.Mesh(new THREE.BoxGeometry(5.4,2.2,2.4),M(0xf4f7fa,{roughness:.45})); body.position.set(-.6,1.7,0); body.castShadow=true; g.add(body);
+  [-1.21,1.21].forEach(z=>{ const s2=new THREE.Mesh(new THREE.PlaneGeometry(5.2,2),new THREE.MeshStandardMaterial({map:t112,roughness:.5})); s2.position.set(-.6,1.7,z); s2.rotation.y=z>0?0:Math.PI; g.add(s2); });
+  const cab=new THREE.Mesh(new THREE.BoxGeometry(2.2,1.6,2.3),M(0xf4f7fa,{roughness:.45})); cab.position.set(3.1,1.4,0); cab.castShadow=true; g.add(cab);
+  const glass=new THREE.Mesh(new THREE.BoxGeometry(.3,1,2.05),M(0x24425e,{roughness:.12,metalness:.45})); glass.position.set(4.15,1.65,0); g.add(glass);
+  const bar=new THREE.Mesh(new THREE.BoxGeometry(2,.3,1.7),M(0x1b2430)); bar.position.set(.6,2.95,0); g.add(bar);
+  [-.55,.55].forEach((x,i)=>{ const l=new THREE.Mesh(new THREE.BoxGeometry(.7,.34,1.5),M(i?0xff4d4d:0x4d7dff,{emissive:i?0xff2020:0x2050ff,emissiveIntensity:.6})); l.position.set(.6+x,3.05,0); g.add(l); ambLights.push(l); });
+  const krzyz=(x,y,z,ry)=>{ const c1=new THREE.Mesh(new THREE.BoxGeometry(.9,.26,.06),M(0xd62828)); const c2=new THREE.Mesh(new THREE.BoxGeometry(.26,.9,.06),M(0xd62828)); [c1,c2].forEach(m=>{ m.position.set(x,y,z); m.rotation.y=ry; g.add(m); }); };
+  krzyz(-3.32,1.9,0,Math.PI/2);
+  [[1.7,1.1],[-1.9,1.1],[1.7,-1.1],[-1.9,-1.1]].forEach(([x,z])=>{ const w=new THREE.Mesh(new THREE.CylinderGeometry(.5,.5,.42,14),M(0x1b1b1b)); w.rotation.x=Math.PI/2; w.position.set(x,.5,z); g.add(w); });
+  g.position.set(AMB.x,0,AMB.z); g.rotation.y=Math.PI; world.add(g);
+  colliders.push({x:AMB.x-3.6,z:AMB.z-1.7,w:7.2,d:3.4});
+  makeLabel('🚑 AKADEMIA 112',AMB.x,5.4,AMB.z,1,'rgba(140,20,20,.72)',120);
+}
+
+/* ---------- HALA W KSZTAŁCIE DRUKARKI 3D: wejście do gry „Akademia Dyszy” ---------- */
+let dyszaHead=null, dyszaGantry=null;
+{ const g=new THREE.Group();
+  const stal=M(0x99a2ad,{metalness:.55,roughness:.32});
+  const baza=new THREE.Mesh(new THREE.BoxGeometry(10,2.6,9),M(0x2c3441,{roughness:.6})); baza.position.y=1.3; baza.castShadow=true; baza.receiveShadow=true; g.add(baza);
+  const drzwi=new THREE.Mesh(new THREE.BoxGeometry(2.2,2.1,.2),M(0x11161f,{emissive:0xffc866,emissiveIntensity:.12})); drzwi.position.set(0,1.05,4.55); g.add(drzwi);
+  const prog=new THREE.Mesh(new THREE.BoxGeometry(3,.2,1.2),M(0x5b6473)); prog.position.set(0,.1,5.2); g.add(prog);
+  [[-4.4,-3.9],[4.4,-3.9],[-4.4,3.9],[4.4,3.9]].forEach(([x,z])=>{ const c=new THREE.Mesh(new THREE.BoxGeometry(.6,9.4,.6),stal); c.position.set(x,7.3,z); c.castShadow=true; g.add(c); });
+  [[0,-3.9,10,'x'],[0,3.9,10,'x'],[-4.4,0,8.4,'z'],[4.4,0,8.4,'z']].forEach(([x,z,len,os])=>{ const b=new THREE.Mesh(new THREE.BoxGeometry(os==='x'?len:.6,.6,os==='x'?.6:len),stal); b.position.set(x,11.9,z); g.add(b); });
+  const stol=new THREE.Mesh(new THREE.BoxGeometry(7.6,.4,6.6),M(0x1d2733,{roughness:.25,metalness:.3})); stol.position.y=3.1; g.add(stol);
+  const szyba=new THREE.Mesh(new THREE.BoxGeometry(7.2,.12,6.2),M(0x7fd4e8,{transparent:true,opacity:.55,roughness:.1,metalness:.2})); szyba.position.y=3.36; g.add(szyba);
+  for(let i=0;i<7;i++){ const w=new THREE.Mesh(new THREE.BoxGeometry(2.6-i*.18,.34,2.6-i*.18),M(0xff8b3d,{roughness:.7})); w.position.set(0,3.6+i*.34,0); w.castShadow=true; g.add(w); }
+  dyszaGantry=new THREE.Mesh(new THREE.BoxGeometry(9.4,.5,.5),stal); dyszaGantry.position.set(0,7.6,0); g.add(dyszaGantry);
+  dyszaHead=new THREE.Group();
+  const blok=new THREE.Mesh(new THREE.BoxGeometry(1.4,1.3,1.2),M(0x39424f,{metalness:.4})); blok.position.y=-.1; dyszaHead.add(blok);
+  const dysza=new THREE.Mesh(new THREE.ConeGeometry(.32,.7,10),M(0xd9a441,{metalness:.7,roughness:.25})); dysza.position.y=-1.05; dysza.rotation.x=Math.PI; dyszaHead.add(dysza);
+  const went=new THREE.Mesh(new THREE.BoxGeometry(.3,1,1),M(0x1f2731)); went.position.set(.85,-.1,0); dyszaHead.add(went);
+  dyszaHead.position.set(0,7.4,0); g.add(dyszaHead);
+  { const uch=new THREE.Mesh(new THREE.CylinderGeometry(.18,.18,1.2,10),stal); uch.rotation.z=Math.PI/2; uch.position.set(5.3,9.4,0); g.add(uch);
+    const szp=new THREE.Mesh(new THREE.CylinderGeometry(1.5,1.5,.9,22),M(0x2fb673,{roughness:.75})); szp.rotation.z=Math.PI/2; szp.position.set(5.9,9.4,0); szp.castShadow=true; g.add(szp);
+    [-.5,.5].forEach(d=>{ const t=new THREE.Mesh(new THREE.CylinderGeometry(1.65,1.65,.12,22),M(0x1b2430)); t.rotation.z=Math.PI/2; t.position.set(5.9+d*.5,9.4,0); g.add(t); }); }
+  const napis=tex(256,64,(c,w,h)=>{ c.fillStyle='#131b26'; c.fillRect(0,0,w,h); c.fillStyle='#ffc857'; c.font='bold 34px Inter, Nunito, sans-serif'; c.textAlign='center'; c.textBaseline='middle'; c.fillText('OMNI 200',w/2,h/2); });
+  const tab=new THREE.Mesh(new THREE.PlaneGeometry(4.4,1.1),new THREE.MeshStandardMaterial({map:napis,roughness:.6,emissive:0x3a2c08,emissiveIntensity:.35})); tab.position.set(0,2.1,4.62); g.add(tab);
+  g.position.set(DYSZA.x,0,DYSZA.z); world.add(g);
+  colliders.push({x:DYSZA.x-5.2,z:DYSZA.z-4.7,w:10.4,d:9.4});
+  makeLabel('🖨️ AKADEMIA DYSZY',DYSZA.x,13.6,DYSZA.z,1,'rgba(20,40,70,.72)',130);
+}
 box(6,.6,.6,0x6b5a45,24,.3,38).rotation.y=.5; box(5,.6,.6,0x6b5a45,14,.3,40).rotation.y=-.4; { const mud=new THREE.Mesh(new THREE.CircleGeometry(9,24),M(0x5a4a3a)); mud.rotation.x=-Math.PI/2; mud.position.set(18,.035,40); world.add(mud); }
 { const plaza=new THREE.Mesh(new THREE.CircleGeometry(9,28),M(KIDS?0xffe9c2:0x9a9384)); plaza.rotation.x=-Math.PI/2; plaza.position.set(-20,.035,30); world.add(plaza); box(2.4,.5,.8,0x8b5a2b,-24,.7,30); box(2.4,.5,.8,0x8b5a2b,-16,.7,30); makeLabel('PLAC SĄSIEDZKI – MIEJSCE A',-20,5,30,.85,undefined,70); }
 for(let i=0;i<8;i++) tree(38+Math.cos(i*.8)*9,55+Math.sin(i*.8)*8,1+Math.random()*.4);
@@ -250,7 +311,7 @@ $('#actBtn').onclick=()=>interact();
 function collides(x,z){ if(Math.abs(z-45)<8&&Math.abs(x)>4&&!floodMode) return true; for(const c of colliders){ if(x>c.x&&x<c.x+c.w&&z>c.z&&z<c.z+c.d) return true; } return false; }
 
 /* ---------- STAN ---------- */
-let near=null,nearPick=null,nearNpc=null,panelOpen=false,floodMode=false,floodLevel=-1,floodT=0,dropWait=false,tapMode=false,night=false,last=performance.now();
+let near=null,nearPick=null,nearNpc=null,nearGame=null,panelOpen=false,floodMode=false,floodLevel=-1,floodT=0,dropWait=false,tapMode=false,night=false,last=performance.now();
 let quest=null,target=null,timedRun=false,timedT=0,timedStep=null,timedIdx=0;
 const objEl=document.createElement('div'); objEl.style.cssText='position:fixed;left:14px;top:110px;z-index:5;max-width:min(380px,80vw);pointer-events:none'; document.body.appendChild(objEl);
 function setObjective(text){ const h=$('#hint'); if(h) h.style.display=(text||quest)?'none':''; objEl.innerHTML=text?'<div class="pill" style="display:block;white-space:normal;line-height:1.35;border-left:4px solid var(--accent)">🎯 '+text+'</div>':''; }
@@ -290,13 +351,16 @@ function loop(now){ requestAnimationFrame(loop); if(canvas.width!==Math.floor(in
     near=null; nearPick=null; nearNpc=null;
     if(!quest){ for(const m of MISSIONS){ if(Math.hypot(player.position.x-m.pos[0],player.position.z-m.pos[1])<3.4){ near=m; break; } } }
     else { const st=quest.steps[quest.i]; if(st&&(st.type==='collect'||timedRun)){ for(const p of pickups){ if(!p.taken&&Math.hypot(player.position.x-p.x,player.position.z-p.z)<2.2){ nearPick=p; break; } } } if(st&&(st.type==='goto'||st.type==='talk')&&target&&Math.hypot(player.position.x-target.x,player.position.z-target.z)<target.r) nearNpc=st; }
-    const ab=$('#actBtn'); if(near){ ab.style.display='block'; const locked=!state.done[near.id]&&!MISSIONS.filter(x=>x.id<near.id).every(x=>state.done[x.id]); ab.textContent=locked?'🔒 Najpierw poprzednie misje':(state.done[near.id]?'🔁 Powtórz: ':'▶ ')+near.name+' (E)'; } else if(nearPick){ ab.style.display='block'; ab.textContent='✋ '+nearPick.name+' (E)'; } else if(nearNpc){ ab.style.display='block'; ab.textContent=(nearNpc.type==='talk'?'💬 Rozmawiaj':'✅ '+(nearNpc.action||'Wykonaj'))+' (E)'; } else ab.style.display='none';
+    nearGame=null; if(!quest&&!near){ for(const k in GRY){ const gg=GRY[k]; if(Math.hypot(player.position.x-gg.x,player.position.z-gg.z)<gg.r){ nearGame=gg; break; } } }
+    const ab=$('#actBtn'); if(near){ ab.style.display='block'; const locked=!state.done[near.id]&&!MISSIONS.filter(x=>x.id<near.id).every(x=>state.done[x.id]); ab.textContent=locked?'🔒 Najpierw poprzednie misje':(state.done[near.id]?'🔁 Powtórz: ':'▶ ')+near.name+' (E)'; } else if(nearPick){ ab.style.display='block'; ab.textContent='✋ '+nearPick.name+' (E)'; } else if(nearNpc){ ab.style.display='block'; ab.textContent=(nearNpc.type==='talk'?'💬 Rozmawiaj':'✅ '+(nearNpc.action||'Wykonaj'))+' (E)'; } else if(nearGame){ ab.style.display='block'; ab.textContent=nearGame.btn+' (E)'; } else ab.style.display='none';
   }
   if(moving&&hintEl&&!hintHidden){ hintHidden=true; hintEl.style.transition='opacity .6s'; hintEl.style.opacity='0'; setTimeout(()=>{ if(hintHidden) hintEl.style.display='none'; },700); }
   walkT+=dt*(moving?10:0); const u=player.userData; const sw=moving?Math.sin(walkT)*.6:0; u.legL.rotation.x=sw; u.legR.rotation.x=-sw; u.armL.rotation.x=-sw; u.armR.rotation.x=sw;
   npcs.forEach((n,i)=>{ if(n.mesh.userData.tail) n.mesh.userData.tail.rotation.y=Math.sin(t*8)*.5; else if(n.id!=='ofiara'){ n.mesh.position.y=Math.sin(t*2+i)*.03; n.mesh.userData.armL.rotation.x=Math.sin(t*1.5+i)*.15; } });
   MISSIONS.forEach((m,i)=>{ m.ring.rotation.z=t*2; m.lab.position.y=6.8+Math.sin(t*2+i)*.2; });
   pickups.forEach((p,i)=>{ if(!p.taken){ p.mesh.children[0].rotation.y=t*2; p.mesh.children[0].position.y=1+Math.sin(t*3+i)*.15; } });
+  { const bl=(Math.sin(t*7)+1)/2; ambLights.forEach((l,i)=>{ l.material.emissiveIntensity=(i?bl:1-bl)*1.6+.15; }); }
+  if(dyszaHead){ dyszaHead.position.x=Math.sin(t*.9)*3.4; dyszaHead.position.z=Math.sin(t*.37)*2.6; if(dyszaGantry) dyszaGantry.position.z=dyszaHead.position.z; }
   clouds.forEach(c=>{ c.position.x+=c.userData.v*dt*2; if(c.position.x>180) c.position.x=-180; });
   const pa=riverGeo.attributes.position.array; for(let i=0;i<pa.length;i+=3){ pa[i+2]=Math.sin(riverBase[i]*.15+t*1.5)*.18+Math.cos(riverBase[i+1]*.4+t)*.08; } riverGeo.attributes.position.needsUpdate=true;
   if(rain.visible){ const r=rainGeo.attributes.position.array; for(let i=0;i<RN;i++){ r[i*3+1]-=dt*28; if(r[i*3+1]<0){ r[i*3+1]=40; r[i*3]=player.position.x+(Math.random()-.5)*120; r[i*3+2]=player.position.z+(Math.random()-.5)*120; } } rainGeo.attributes.position.needsUpdate=true; }
@@ -343,11 +407,17 @@ function runStep(){ const st=quest.steps[quest.i]; target=null; if(!timedRun) cl
     case 'rain': rain.visible=st.on; nextStep(); break;
     case 'end': finishQuest(st); break;
   } }
-function interact(){ if(near&&!quest){ startMission(near); return; } if(!quest) return; const st=quest.steps[quest.i]; if(!st) return;
+function interact(){ if(nearGame&&!quest&&!near){ showGra(nearGame); return; } if(near&&!quest){ startMission(near); return; } if(!quest) return; const st=quest.steps[quest.i]; if(!st) return;
   if(timedRun&&nearPick){ const p=nearPick; const want=timedStep.points[timedIdx]; if(p.idx===timedIdx){ p.taken=true; scene.remove(p.mesh); pick(); toast('✅ '+want.name+(want.why?' – '+want.why:'')); timedIdx++; if(timedIdx>=timedStep.points.length) endTimed(true); else setObjective('Krok '+(timedIdx+1)+'/'+timedStep.points.length+': '+timedStep.points[timedIdx].name); } else { bad(); updateCalm(-4); timedT-=5; toast('❌ Nie ta kolejność! Teraz: '+want.name+' (−5 s)'); } return; }
   if(st.type==='collect'&&nearPick){ const p=nearPick; p.taken=true; scene.remove(p.mesh); const need=st.items.filter(i=>i.good).length; if(p.good){ quest.got++; pick(); setObjective(st.obj+' ('+quest.got+'/'+need+')'); toast('✅ '+p.name+(p.why?' – '+p.why:'')); if(quest.got>=need) setTimeout(nextStep,600); } else { bad(); updateCalm(-3); toast('🚫 '+p.name+': '+p.why); quest.stars=Math.max(1,quest.stars-1); } }
   else if(st.type==='goto'&&nearNpc){ good(); if(st.msg) toast(st.msg); nextStep(); }
   else if(st.type==='talk'&&nearNpc) showTalk(st); }
+function showGra(g){ TR('dodatkowa_gra',{gra:g.key,dostepna:!!g.url});
+  const wroc='<button class="btn ghost" id="wrotGra">Wracam do miasteczka</button>';
+  open('<h2>'+g.tytul+'</h2><p>'+g.opis+'</p>'+(g.url
+    ? '<p class="small">Gra otworzy się w nowej karcie. Miasteczko zostaje tu, gdzie jesteś.</p><div class="navbtns" style="justify-content:center"><a class="btn primary" href="'+g.url+'" target="_blank" rel="noopener">'+g.cta+'</a>'+wroc+'</div>'
+    : '<div class="msg"><b>Ta gra jeszcze nie stoi w internecie.</b> Kod jest gotowy, brakuje adresu. Gdy tylko będzie, ten obiekt zacznie do niej prowadzić.</div><div class="navbtns" style="justify-content:center">'+wroc+'</div>'));
+  const b=$('#wrotGra'); if(b) b.onclick=close; }
 function showTalk(st){ let i=0; const lines=st.lines; const step=()=>{ const l=lines[i]; if(!l){ close(); nextStep(); return; }
   if(l.choice){ open(head(quest.mission)+npcLine(l.npc,l.text)+'<div class="qitem" style="margin-top:10px">'+l.choice.map((c,ci)=>'<button class="opt" data-c="'+ci+'">'+c.t+'</button>').join('')+'</div><div id="why"></div>'); pbox.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{ const c=l.choice[+b.dataset.c]; quest.total++; if(c.ok){ quest.ok++; b.classList.add('correct'); beep(880,.1); updateCalm(c.calm||3); } else { b.classList.add('wrong'); bad(); updateCalm(c.calm||-8); const g=l.choice.findIndex(x=>x.ok); if(g>=0) pbox.querySelector('.opt[data-c="'+g+'"]').classList.add('correct'); } pbox.querySelectorAll('.opt').forEach(x=>x.onclick=null); $('#why').innerHTML='<div class="msg '+(c.ok?'good':'badm')+'">'+(c.ok?'✅ ':'💡 ')+c.why+'</div><div class="navbtns" style="justify-content:flex-end"><button class="btn primary" id="nx">Dalej →</button></div>'; $('#nx').onclick=()=>{ i++; step(); }; }); }
   else { open(head(quest.mission)+npcLine(l.npc,l.text)+'<div class="navbtns" style="justify-content:flex-end"><button class="btn primary" id="nx">'+(l.btn||'Dalej →')+'</button></div>'); $('#nx').onclick=()=>{ i++; step(); }; } }; step(); }

@@ -79,15 +79,16 @@ Cały pomiar przechodzi przez jedną funkcję `window.track(nazwa, dane)` z plik
 | `certyfikat` | wygenerowanie certyfikatu | liczba ukończonych rozdziałów |
 | `powrot` | pierwsza wizyta w nowym dniu | ile dni od pierwszej wizyty, która to wizyta |
 | `zgoda` | decyzja w banerze zgody | `tak` albo `nie` |
+| `dodatkowa_gra` | podejście do karetki albo hali-drukarki | która gra, czy adres jest ustawiony |
 
 Powroty liczone są lokalnie w przeglądarce, bez ciasteczek. Analytics startuje w trybie zgody z odmową przechowywania danych, czyli bez plików cookie. Pole `cookieless` w `assets/analytics.js` przełącza to zachowanie.
 
 ## Po edycji plików podbij numer wersji
 
-Odwołania do plików w `assets/` mają na końcu `?v=` i numer (obecnie `?v=13`). Po każdej zmianie w `assets/` podnieś ten numer we wszystkich trzech plikach HTML, na przykład:
+Odwołania do plików w `assets/` mają na końcu `?v=` i numer (obecnie `?v=14`). Po każdej zmianie w `assets/` podnieś ten numer we wszystkich trzech plikach HTML, na przykład:
 
 ```bash
-sed -i '' 's/?v=13/?v=14/g' index.html szkolenie.html gra.html
+sed -i '' 's/?v=14/?v=15/g' index.html szkolenie.html gra.html
 ```
 
 Bez tego przeglądarki odwiedzających będą jeszcze przez jakiś czas używać starych, zapisanych w pamięci podręcznej wersji.
@@ -138,6 +139,36 @@ otwiera okno zgody ponownie: komunikat Google, jeśli działa, w przeciwnym razi
 **Do zrobienia po stronie serwisu głównego:** strona `punktodpornosci.pl/prywatnosc` twierdzi
 dziś, że serwis nie używa cookies do analityki ani reklamy. Dla subdomeny `poradnik.` to już
 nieprawda, więc tekst trzeba poprawić. Gotowy tekst do wklejenia dostałeś osobno.
+
+## Dwie dodatkowe gry w miasteczku
+
+W świecie gry stoją dwa obiekty, które prowadzą do osobnych gier:
+
+| Obiekt | Gdzie stoi | Dokąd prowadzi |
+|---|---|---|
+| 🚑 Karetka | przed PUNKTEM MEDYCZNYM, współrzędne 50 / 30 | Akademia 112 – pierwsza pomoc i bezpieczeństwo |
+| 🖨️ Hala w kształcie drukarki „OMNI 200” | obok SZKOŁY, współrzędne 24 / −46 | Akademia Dyszy – druk 3D, [mhalaba/akademia-dyszy](https://github.com/mhalaba/akademia-dyszy) |
+
+Gracz podchodzi, wciska **E** (albo przycisk akcji na telefonie) i dostaje okienko z opisem
+gry oraz przyciskiem otwierającym ją w nowej karcie. Sterowanie zostało bez zmian: obiekty
+reagują wyłącznie wtedy, gdy nie trwa żadna misja i gracz nie stoi przy znaczniku misji.
+
+**Adresy wpisuje się w jednym miejscu** – `assets/game.js`, obiekt `GRY`, pole `url`:
+
+```js
+const GRY={
+  akademia112:{ key:'akademia112', url:'', ... },
+  dysza:{ key:'akademia_dyszy', url:'', ... }
+};
+```
+
+Dopóki `url` jest puste, obiekt stoi w miasteczku i mówi, że gra jeszcze nie ruszyła — nikt
+nie trafia w martwy link. Obie gry to aplikacje Node (WebSocket i serwer), więc nie da się ich
+postawić na GitHub Pages razem z tą stroną; potrzebują własnego hostingu, na przykład Render
+albo Railway, albo — w przypadku Akademii Dyszy — statycznego builda Vite na osobnej subdomenie.
+
+Kliknięcie wysyła zdarzenie pomiaru `dodatkowa_gra` z nazwą gry i informacją, czy adres był
+już ustawiony.
 
 ## Link do książki
 
