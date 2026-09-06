@@ -83,10 +83,10 @@ Powroty liczone są lokalnie w przeglądarce, bez ciasteczek. Analytics startuje
 
 ## Po edycji plików podbij numer wersji
 
-Odwołania do skryptów mają na końcu `?v=3`. Po każdej zmianie plików w `assets/` podnieś ten numer we wszystkich trzech plikach HTML, na przykład:
+Odwołania do plików w `assets/` mają na końcu `?v=` i numer (obecnie `?v=9`, favikona `?v=10`). Po każdej zmianie w `assets/` podnieś ten numer we wszystkich trzech plikach HTML, na przykład:
 
 ```bash
-sed -i '' 's/?v=3/?v=4/g' index.html szkolenie.html gra.html
+sed -i '' 's/?v=9/?v=10/g' index.html szkolenie.html gra.html
 ```
 
 Bez tego przeglądarki odwiedzających będą jeszcze przez jakiś czas używać starych, zapisanych w pamięci podręcznej wersji.
@@ -106,6 +106,23 @@ Co zostało do zrobienia po Twojej stronie:
 3. Jeśli wolisz reklamy w konkretnych, zarezerwowanych miejscach: utwórz trzy jednostki displayowe, skopiuj numery `data-ad-slot` i wpisz je w `assets/ads.js` w polu `slots`. Dopóki pola są puste, zarezerwowane miejsca są ukrywane, żeby nie zostawiać pustych ramek.
 
 **Wersja dla dzieci:** skrypt ustawia flagę `tag_for_child_directed_treatment` (wymóg Google dla treści kierowanych do dzieci – reklamy niespersonalizowane). Zgodnie z polityką AdSense warto dodatkowo w panelu oznaczyć podstrony `?wersja=dzieci` jako treści dla dzieci.
+
+## Zgoda na ciasteczka (RODO)
+
+Komunikat zgody jest opublikowany w AdSense → Prywatność i wiadomości → Przepisy europejskie.
+Nazwa: „Zgoda RODO – punktodpornosci.pl”. Język domyślny: polski, dodatkowo angielski.
+Witryna: `punktodpornosci.pl` (obejmuje też subdomenę `poradnik.`).
+
+Ustawienia: przycisk „Nie wyrażam zgody” włączony we wszystkich krajach, czyli odmowa jest
+tak samo łatwa jak zgoda. Logo w oknie zgody to `assets/logo.png`, ten sam plik służy za
+favikonę stron. Polityka prywatności podpięta pod adres `https://punktodpornosci.pl/prywatnosc`.
+
+Komunikat wyświetla się przez skrypt AdSense, który jest w `<head>` każdej strony, i sam
+aktualizuje tryb zgody Google. Do czasu zgody `assets/analytics.js` trzyma wszystkie sygnały
+na „denied”, więc Analytics działa bez ciasteczek.
+
+Do zrobienia po stronie serwisu głównego: strona `punktodpornosci.pl/prywatnosc` powinna
+dostać akapit o Google Analytics, AdSense i plikach cookie.
 
 ## Link do książki
 
