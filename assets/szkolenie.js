@@ -108,7 +108,7 @@
       '<p>' + (kids ? 'ukończył(a) ' + d + ' z ' + DATA.length + ' misji' : 'ukończył(a) ' + d + ' z ' + DATA.length + ' rozdziałów szkolenia') + ' na podstawie książki<br>„' + KSIAZKA.tytul + '” – ' + KSIAZKA.autor + '</p>' +
       (kids ? '<div class="badges" style="justify-content:center">' + DATA.filter(c=>progress[c.id]&&progress[c.id].done).map(c=>'<span class="badge">'+c.odznaka+'</span>').join('') + '</div>' : '') +
       '<p class="small">Data: ' + new Date().toLocaleDateString('pl-PL') + '</p>' +
-      '<div class="navbtns" style="justify-content:center"><button class="btn primary" onclick="window.print()">🖨️ Drukuj</button><a class="btn ghost" href="gra.html?wersja=' + wersja + '">🎮 Zagraj w grę 3D</a><a class="btn ghost buy" target="_blank" rel="noopener" href="' + KSIAZKA.sklep + '">📖 Kup książkę</a></div>' +
+      '<div class="navbtns" style="justify-content:center"><button class="btn primary" onclick="window.print()">🖨️ Drukuj</button><a class="btn ghost" href="gra.html?wersja=' + wersja + '">🎮 Zagraj w grę 3D</a></div>' +
       (d < DATA.length ? '<p class="small">Nie wszystkie rozdziały zaliczone – wróć do spisu po lewej i uzupełnij quizy.</p>' : '') +
       '</div>';
     window.scrollTo({top:0,behavior:'smooth'});
