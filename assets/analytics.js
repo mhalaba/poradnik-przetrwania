@@ -43,7 +43,8 @@ window.ANALYTICS = {
     s.src = 'https://www.googletagmanager.com/gtag/js?id=' + cfg.ga4;
     document.head.appendChild(s);
     gtag('js', new Date());
-    gtag('config', cfg.ga4, { anonymize_ip: true, send_page_view: true });
+    // debug_mode kieruje zdarzenia do widoku DebugView w Analytics – tylko przy ?debug=1
+    gtag('config', cfg.ga4, { anonymize_ip: true, send_page_view: true, debug_mode: DEBUG });
   }
 
   /* --- podgląd na ekranie przy ?debug=1 --- */
