@@ -56,6 +56,31 @@ Zmiany pojawiają się na żywo po około minucie.
 
 Wystarczy w panelu home.pl zmienić cztery rekordy A subdomeny z powrotem na adres 46.242.242.147. Pliki tam czekają.
 
+## Pomiar (analityka)
+
+Cały pomiar przechodzi przez jedną funkcję `window.track(nazwa, dane)` z pliku `assets/analytics.js`. Reszta kodu nie wie, jaki dostawca jest podpięty.
+
+**Podgląd bez konta.** Dopisz `?debug=1` do adresu dowolnej strony. Zdarzenia wypiszą się w konsoli i w małym oknie w rogu ekranu. Przykład: `https://poradnik.punktodpornosci.pl/gra.html?wersja=dzieci&debug=1`
+
+**Włączenie Google Analytics.** W panelu Analytics utwórz usługę i strumień danych dla adresu strony, skopiuj identyfikator w formacie `G-XXXXXXXXXX` i wklej go w `assets/analytics.js` w polu `ga4`. Nic więcej nie trzeba zmieniać.
+
+**Mierzone zdarzenia**
+
+| Zdarzenie | Kiedy | Najważniejsze dane |
+|---|---|---|
+| `gra_start` | kliknięcie „Graj” w grze | liczba wcześniej ukończonych misji |
+| `misja_start` | rozpoczęcie misji | numer i nazwa misji, czy to powtórka |
+| `misja_koniec` | zaliczenie misji | gwiazdki, poziom spokoju, łącznie ukończonych |
+| `misja_przerwana` | rezygnacja po nieudanej próbie | numer misji |
+| `zobowiazanie` | zaznaczenie planu „jeśli–to” | numer misji |
+| `gra_ukonczona` | wszystkie misje zaliczone | gwiazdki, punkty |
+| `rozdzial_otwarty` | wejście w rozdział szkolenia | numer i tytuł rozdziału |
+| `quiz_zakonczony` | odpowiedź na ostatnie pytanie | wynik, czy zaliczony |
+| `certyfikat` | wygenerowanie certyfikatu | liczba ukończonych rozdziałów |
+| `powrot` | pierwsza wizyta w nowym dniu | ile dni od pierwszej wizyty, która to wizyta |
+
+Powroty liczone są lokalnie w przeglądarce, bez ciasteczek. Analytics startuje w trybie zgody z odmową przechowywania danych, czyli bez plików cookie. Pole `cookieless` w `assets/analytics.js` przełącza to zachowanie.
+
 ## Po edycji plików podbij numer wersji
 
 Odwołania do skryptów mają na końcu `?v=3`. Po każdej zmianie plików w `assets/` podnieś ten numer we wszystkich trzech plikach HTML, na przykład:

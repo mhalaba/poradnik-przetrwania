@@ -18,6 +18,7 @@
   $('#verTitle').textContent = kids ? '⭐ Misje Małego Strażnika' : '📚 Szkolenie dla dorosłych';
   document.title = (kids ? 'Misje dla dzieci' : 'Szkolenie dla dorosłych') + ' – Poradnik przetrwania';
 
+  const TR = (n,d) => { try { (window.track||function(){})(n, d||{}); } catch(e){} };
   function save(){ try { localStorage.setItem(KEY, JSON.stringify(progress)); } catch(e){} }
   function doneCount(){ return DATA.filter(c => progress[c.id] && progress[c.id].done).length; }
 
@@ -41,6 +42,7 @@
 
   function render(){
     const c = DATA[idx];
+    TR('rozdzial_otwarty', { rozdzial_id: c.id, rozdzial: c.tytul });
     history.replaceState(null, '', '?wersja=' + wersja + '&r=' + idx);
     const el = $('#chapter');
     let html = '';
@@ -84,6 +86,7 @@
         const score = Object.keys(answers).filter(k => answers[k] === c.quiz[k].a).length;
         const pass = score >= Math.ceil(total * 0.6);
         $('#qres').innerHTML = (pass ? '🎉 ' : '🙂 ') + 'Wynik: ' + score + ' / ' + total + (pass ? (kids ? ' – odznaka ' + c.odznaka + ' zdobyta!' : ' – rozdział zaliczony!') : ' – przeczytaj jeszcze raz i spróbuj ponownie. <button class="btn sm ghost" id="retry">Spróbuj ponownie</button>');
+        TR('quiz_zakonczony', { rozdzial_id: c.id, wynik: score, z: total, zaliczony: pass });
         if (pass) { progress[c.id] = { done: true, score, total }; save(); renderToc(); }
         const r = $('#retry'); if (r) r.onclick = () => render();
       }
@@ -99,6 +102,7 @@
 
   function finish(){
     const d = doneCount();
+    TR('certyfikat', { ukonczone: d, wszystkich: DATA.length });
     const el = $('#chapter');
     const name = (prompt(kids ? 'Jak masz na imię, Strażniku?' : 'Podaj imię i nazwisko do certyfikatu:') || '').trim() || (kids ? 'Mały Strażnik' : 'Uczestnik');
     el.innerHTML = '<div class="cert">' +
