@@ -122,7 +122,7 @@ window.ANALYTICS = {
     const st = document.createElement('style');
     st.id = 'pp-zgoda-styl';
     st.textContent =
-      '.pp-zgoda{position:fixed;left:12px;right:12px;bottom:12px;z-index:99998;max-width:640px;margin:0 auto;' +
+      '.pp-zgoda{position:fixed;left:12px;right:12px;bottom:12px;z-index:99998;max-width:820px;margin:0 auto;' +
       'display:flex;flex-direction:column;gap:12px;padding:16px 18px;border-radius:14px;' +
       'background:#0e1a2d;color:#e8eefc;border:1px solid rgba(255,255,255,.16);' +
       'box-shadow:0 18px 44px rgba(0,0,0,.45);font:400 .92rem/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}' +
@@ -134,7 +134,9 @@ window.ANALYTICS = {
       'border:1px solid #ffc857;background:transparent;color:#ffc857}' +
       '.pp-zgoda-guziki button[data-wybor="tak"]{background:#ffc857;color:#12233d}' +
       '.pp-zgoda-guziki button:focus-visible{outline:3px solid #7fb2ff;outline-offset:2px}' +
-      '@media(min-width:620px){.pp-zgoda{flex-direction:row;align-items:center}.pp-zgoda-guziki{flex:0 0 300px}}';
+      '@media(min-width:680px){.pp-zgoda{flex-direction:row;align-items:center;gap:20px;padding:18px 22px}' +
+      '.pp-zgoda-tresc{flex:1}.pp-zgoda-guziki{flex:0 0 auto}' +
+      '.pp-zgoda-guziki button{flex:0 0 auto;white-space:nowrap;padding:11px 20px}}';
     document.head.appendChild(st);
   }
 
