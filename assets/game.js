@@ -116,7 +116,7 @@ const GRY={
     tytul:'🚑 Akademia 112',
     opis:'Osobna gra o pierwszej pomocy i bezpieczeństwie. Uczysz się rozpoznać zatrzymanie krążenia, uciskać klatkę w rytmie 100–120 na minutę, zatamować krwotok, zachować się przy podejrzanej paczce i przy dymie w budynku. Są też sygnały alarmowe i ewakuacja. Dla dzieci 10–14 lat, do grania razem.',
     cta:'Wsiadam do karetki →' },
-  dysza:{ key:'akademia_dyszy', url:'', x:24, z:-46, r:6.2, btn:'🖨️ Akademia Dyszy',
+  dysza:{ key:'akademia_dyszy', url:'akademia-dyszy/', x:24, z:-46, r:6.2, btn:'🖨️ Akademia Dyszy',
     tytul:'🖨️ Akademia Dyszy',
     opis:'Osobna gra-kampus o druku 3D. Lekcje o drukarce, filamencie, fizyce i matematyce wydruku, laboratoria (zużycie nitki, wysokość warstwy, skala, układ współrzędnych), quizy, egzamin i dyplom. Dla uczniów 10–14 lat, program STEAM.',
     cta:'Wchodzę do hali →' }

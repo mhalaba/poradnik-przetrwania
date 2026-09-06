@@ -147,7 +147,7 @@ W świecie gry stoją dwa obiekty, które prowadzą do osobnych gier:
 | Obiekt | Gdzie stoi | Dokąd prowadzi |
 |---|---|---|
 | 🚑 Karetka | przed PUNKTEM MEDYCZNYM, współrzędne 50 / 30 | Akademia 112 – gra leży w katalogu `akademia-112/` tego repozytorium, adres `/akademia-112/` |
-| 🖨️ Hala w kształcie drukarki „OMNI 200” | obok SZKOŁY, współrzędne 24 / −46 | Akademia Dyszy – druk 3D, [mhalaba/akademia-dyszy](https://github.com/mhalaba/akademia-dyszy) |
+| 🖨️ Hala w kształcie drukarki „OMNI 200” | obok SZKOŁY, współrzędne 24 / −46 | Akademia Dyszy – gra leży w katalogu `akademia-dyszy/`, adres `/akademia-dyszy/` |
 
 Gracz podchodzi, wciska **E** (albo przycisk akcji na telefonie) i dostaje okienko z opisem
 gry oraz przyciskiem otwierającym ją w nowej karcie. Sterowanie zostało bez zmian: obiekty
@@ -165,10 +165,11 @@ const GRY={
 Dopóki `url` jest puste, obiekt stoi w miasteczku i mówi, że gra jeszcze nie ruszyła — nikt
 nie trafia w martwy link.
 
-**Akademia 112 jest już na miejscu.** Pliki gry leżą w katalogu `akademia-112/` i działają pod
-adresem `https://poradnik.punktodpornosci.pl/akademia-112/`, na tym samym darmowym certyfikacie.
-Źródło: [mhalaba/akademia-112](https://github.com/mhalaba/akademia-112). Szczegóły kopiowania
-opisuje `akademia-112/README.md`.
+**Obie gry stoją na tym samym serwerze co poradnik**, pod tym samym darmowym certyfikatem, i nie
+prowadzą nigdzie na zewnątrz:
+
+- `akademia-112/` – pliki skopiowane wprost z [mhalaba/akademia-112](https://github.com/mhalaba/akademia-112), bo to czysta statyczna gra. Szczegóły: `akademia-112/README.md`.
+- `akademia-dyszy/` – statyczny build wyciągnięty z [mhalaba/akademia-dyszy](https://github.com/mhalaba/akademia-dyszy). Repozytorium źródłowe to aplikacja z serwerem i bazą, więc zbudowana jest osobna wersja bez routera, logowania i serwera – sama gra ich nie potrzebuje. Procedurę powtórzenia buildu opisuje `akademia-dyszy/README.md`.
 
 Kliknięcie wysyła zdarzenie pomiaru `dodatkowa_gra` z nazwą gry i informacją, czy adres był
 już ustawiony.
