@@ -78,15 +78,16 @@ Cały pomiar przechodzi przez jedną funkcję `window.track(nazwa, dane)` z plik
 | `quiz_zakonczony` | odpowiedź na ostatnie pytanie | wynik, czy zaliczony |
 | `certyfikat` | wygenerowanie certyfikatu | liczba ukończonych rozdziałów |
 | `powrot` | pierwsza wizyta w nowym dniu | ile dni od pierwszej wizyty, która to wizyta |
+| `zgoda` | decyzja w banerze zgody | `tak` albo `nie` |
 
 Powroty liczone są lokalnie w przeglądarce, bez ciasteczek. Analytics startuje w trybie zgody z odmową przechowywania danych, czyli bez plików cookie. Pole `cookieless` w `assets/analytics.js` przełącza to zachowanie.
 
 ## Po edycji plików podbij numer wersji
 
-Odwołania do plików w `assets/` mają na końcu `?v=` i numer (obecnie `?v=11`). Po każdej zmianie w `assets/` podnieś ten numer we wszystkich trzech plikach HTML, na przykład:
+Odwołania do plików w `assets/` mają na końcu `?v=` i numer (obecnie `?v=12`). Po każdej zmianie w `assets/` podnieś ten numer we wszystkich trzech plikach HTML, na przykład:
 
 ```bash
-sed -i '' 's/?v=11/?v=12/g' index.html szkolenie.html gra.html
+sed -i '' 's/?v=12/?v=13/g' index.html szkolenie.html gra.html
 ```
 
 Bez tego przeglądarki odwiedzających będą jeszcze przez jakiś czas używać starych, zapisanych w pamięci podręcznej wersji.
@@ -121,10 +122,18 @@ Komunikat wyświetla się przez skrypt AdSense, który jest w `<head>` każdej s
 aktualizuje tryb zgody Google. Do czasu zgody `assets/analytics.js` trzyma wszystkie sygnały
 na „denied”, więc Analytics działa bez ciasteczek.
 
+**Własny baner zgody.** Komunikat Google zacznie się wyświetlać dopiero po zatwierdzeniu konta
+w AdSense — dziś obie witryny czekają na weryfikację, więc Google ładuje sam mechanizm zgody, ale
+żadnego okna nie pokazuje. Do tego czasu pyta nasz własny baner z `assets/analytics.js`. Zapisuje
+decyzję w `localStorage` pod kluczem `pp_zgoda` (nie w ciasteczku) i wysyła `gtag('consent','update')`.
+Odmowa ma ten sam rozmiar i kontrast co zgoda. W wersji dla dzieci nawet po zgodzie zostają
+wyłączone `ad_user_data` i `ad_personalization`.
+
+Baner sam ustępuje miejsca Google: przed pokazaniem czeka 2,5 sekundy i sprawdza, czy komunikat
+Google się nie pojawił. Gdy AdSense zatwierdzi konto, wystarczy nic nie robić — pytać będzie Google.
+
 Na każdej stronie jest link „Ustawienia prywatności” (w grze pigułka „🔒 Prywatność”), który
-otwiera okno zgody ponownie. Link jest ukryty (`hidden`) i pokazuje się tylko wtedy, gdy Google
-faktycznie załadował komunikat, czyli w Europejskim Obszarze Gospodarczym. Obsługę robi
-`window.ustawieniaPrywatnosci()` w `assets/analytics.js`.
+otwiera okno zgody ponownie: komunikat Google, jeśli działa, w przeciwnym razie nasz baner.
 
 **Do zrobienia po stronie serwisu głównego:** strona `punktodpornosci.pl/prywatnosc` twierdzi
 dziś, że serwis nie używa cookies do analityki ani reklamy. Dla subdomeny `poradnik.` to już

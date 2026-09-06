@@ -11,9 +11,14 @@
    a na dole ekranu pojawi się licznik zdarzeń. Działa też, gdy pole ga4 jest puste.
 
    PRYWATNOŚĆ:
-   Domyślnie włączony jest tryb zgody Google z odmową przechowywania danych, czyli
-   Analytics działa bez plików cookie. Zdarzenia są zliczane, ale użytkownik nie jest
-   śledzony między witrynami. Powroty liczymy sami, w pamięci przeglądarki, bez ciasteczek.
+   Start jest zawsze w trybie zgody Google z odmową przechowywania danych, czyli bez
+   plików cookie. Dopiero decyzja użytkownika może to zmienić. Powroty liczymy sami,
+   w pamięci przeglądarki, bez ciasteczek.
+
+   Pytanie o zgodę zadaje własny baner z tego pliku. Jest tu, bo komunikat Google
+   z panelu AdSense pojawi się dopiero po zatwierdzeniu konta wydawcy, a do tego czasu
+   nikt nie miałby jak wyrazić zgody i Analytics zbierałby wyłącznie dane zbiorcze.
+   Gdy komunikat Google zacznie działać, nasz baner sam ustępuje mu miejsca.
 */
 window.ANALYTICS = {
   ga4: "G-G61R23XN76",  // usluga "Poradnik przetrwania" w koncie halabaeu
@@ -46,6 +51,112 @@ window.ANALYTICS = {
     // debug_mode kieruje zdarzenia do widoku DebugView w Analytics – tylko przy ?debug=1
     gtag('config', cfg.ga4, { anonymize_ip: true, send_page_view: true, debug_mode: DEBUG });
   }
+
+  /* ===== Zgoda użytkownika =====
+     Wybór zapisujemy w pamięci przeglądarki, nie w ciasteczku. Odmowa jest tak samo
+     łatwa jak zgoda: oba przyciski mają ten sam rozmiar i ten sam kontrast. */
+  const KLUCZ_ZGODY = 'pp_zgoda';
+  const DZIECI = document.documentElement.dataset.wersja === 'dzieci' || WERSJA === 'dzieci';
+
+  function zapisanaZgoda(){
+    try { return JSON.parse(localStorage.getItem(KLUCZ_ZGODY) || 'null'); } catch(e){ return null; }
+  }
+  function ustawZgode(zgoda, zapisz){
+    // W wersji dla dzieci nie personalizujemy reklam nawet po zgodzie.
+    const reklamy = (zgoda && !DZIECI) ? 'granted' : 'denied';
+    gtag('consent', 'update', {
+      analytics_storage: zgoda ? 'granted' : 'denied',
+      ad_storage: zgoda ? 'granted' : 'denied',
+      ad_user_data: reklamy,
+      ad_personalization: reklamy
+    });
+    if (zapisz) {
+      try { localStorage.setItem(KLUCZ_ZGODY, JSON.stringify({ zgoda: !!zgoda, data: new Date().toISOString().slice(0,10) })); } catch(e){}
+      window.track('zgoda', { decyzja: zgoda ? 'tak' : 'nie' });
+    }
+  }
+
+  const wybor = zapisanaZgoda();
+  if (ok && wybor) ustawZgode(wybor.zgoda, false);
+
+  /* Czy Google pokazał już własny komunikat? Wtedy nie wtrącamy się. */
+  function googleJuzPyta(){
+    try {
+      if (document.querySelector('.fc-consent-root, .fc-dialog-container')) return true;
+      const g = window.googlefc;
+      if (g && typeof g.getConsentStatus === 'function' && g.getConsentStatus() !== 0) return true;
+    } catch(e){}
+    return false;
+  }
+
+  let baner = null;
+  function pokazBanerZgody(){
+    if (baner) { baner.hidden = false; return; }
+    baner = document.createElement('div');
+    baner.className = 'pp-zgoda';
+    baner.setAttribute('role', 'dialog');
+    baner.setAttribute('aria-label', 'Zgoda na pliki cookie');
+    baner.innerHTML =
+      '<div class="pp-zgoda-tresc">' +
+        '<p><b>Ta strona chciałaby liczyć, jak Ci idzie nauka.</b> Analityka pokazuje nam, które rozdziały ' +
+        'są porzucane i wymagają poprawy, a reklamy Google opłacają hosting. Bez Twojej zgody liczymy tylko ' +
+        'zbiorczo, bez plików cookie i bez rozpoznawania Cię między wizytami.</p>' +
+        '<p class="pp-zgoda-drobne">Decyzję zmienisz w każdej chwili linkiem „Ustawienia prywatności”. ' +
+        '<a href="https://punktodpornosci.pl/prywatnosc" target="_blank" rel="noopener">Polityka prywatności</a></p>' +
+      '</div>' +
+      '<div class="pp-zgoda-guziki">' +
+        '<button type="button" data-wybor="nie">Nie zgadzam się</button>' +
+        '<button type="button" data-wybor="tak">Zgadzam się</button>' +
+      '</div>';
+    baner.querySelectorAll('button').forEach(function(b){
+      b.addEventListener('click', function(){
+        ustawZgode(b.dataset.wybor === 'tak', true);
+        baner.hidden = true;
+      });
+    });
+    document.body.appendChild(baner);
+  }
+
+  function stylZgody(){
+    if (document.getElementById('pp-zgoda-styl')) return;
+    const st = document.createElement('style');
+    st.id = 'pp-zgoda-styl';
+    st.textContent =
+      '.pp-zgoda{position:fixed;left:12px;right:12px;bottom:12px;z-index:99998;max-width:640px;margin:0 auto;' +
+      'display:flex;flex-direction:column;gap:12px;padding:16px 18px;border-radius:14px;' +
+      'background:#0e1a2d;color:#e8eefc;border:1px solid rgba(255,255,255,.16);' +
+      'box-shadow:0 18px 44px rgba(0,0,0,.45);font:400 .92rem/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}' +
+      '.pp-zgoda p{margin:0 0 6px}' +
+      '.pp-zgoda-drobne{font-size:.82rem;color:#9fb2d4}' +
+      '.pp-zgoda-drobne a{color:#ffc857}' +
+      '.pp-zgoda-guziki{display:flex;gap:10px}' +
+      '.pp-zgoda-guziki button{flex:1;padding:11px 14px;border-radius:10px;font:inherit;font-weight:700;cursor:pointer;' +
+      'border:1px solid #ffc857;background:transparent;color:#ffc857}' +
+      '.pp-zgoda-guziki button[data-wybor="tak"]{background:#ffc857;color:#12233d}' +
+      '.pp-zgoda-guziki button:focus-visible{outline:3px solid #7fb2ff;outline-offset:2px}' +
+      '@media(min-width:620px){.pp-zgoda{flex-direction:row;align-items:center}.pp-zgoda-guziki{flex:0 0 300px}}';
+    document.head.appendChild(st);
+  }
+
+  function zgodaStart(){
+    stylZgody();
+    // Link „Ustawienia prywatności” działa zawsze – albo przez Google, albo przez nasz baner.
+    document.querySelectorAll('[data-zgoda]').forEach(function(a){
+      a.hidden = false;
+      a.addEventListener('click', function(e){
+        e.preventDefault();
+        if (googleJuzPyta() && window.googlefc && window.googlefc.showRevocationMessage) {
+          window.ustawieniaPrywatnosci();
+        } else {
+          pokazBanerZgody();
+        }
+      });
+    });
+    if (!ok || zapisanaZgoda()) return;
+    // Dajemy Google chwilę na własny komunikat, dopiero potem pokazujemy swój.
+    setTimeout(function(){ if (!googleJuzPyta() && !zapisanaZgoda()) pokazBanerZgody(); }, 2500);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', zgodaStart); else zgodaStart();
 
   /* --- podgląd na ekranie przy ?debug=1 --- */
   let box = null, licznik = 0;
@@ -98,27 +209,6 @@ window.ANALYTICS = {
       }});
     } catch(e){}
   };
-
-  /* Link pokazujemy tylko tam, gdzie Google faktycznie pyta o zgodę, czyli w EOG.
-     Poza EOG komunikat się nie ładuje i link byłby martwy. */
-  (function(){
-    function wire(){
-      const linki = document.querySelectorAll('[data-zgoda]');
-      if (!linki.length) return;
-      let proby = 0;
-      const tik = setInterval(function(){
-        proby++;
-        if (window.googlefc) {
-          clearInterval(tik);
-          linki.forEach(function(a){
-            a.hidden = false;
-            a.addEventListener('click', function(e){ e.preventDefault(); window.ustawieniaPrywatnosci(); });
-          });
-        } else if (proby > 40) { clearInterval(tik); }
-      }, 250);
-    }
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire); else wire();
-  })();
 
   if (DEBUG) window.track('podglad_wlaczony', { ga4: ok ? 'skonfigurowane' : 'brak' });
 })();
