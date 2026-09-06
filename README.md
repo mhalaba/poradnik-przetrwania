@@ -85,10 +85,10 @@ Powroty liczone są lokalnie w przeglądarce, bez ciasteczek. Analytics startuje
 
 ## Po edycji plików podbij numer wersji
 
-Odwołania do plików w `assets/` mają na końcu `?v=` i numer (obecnie `?v=14`). Po każdej zmianie w `assets/` podnieś ten numer we wszystkich trzech plikach HTML, na przykład:
+Odwołania do plików w `assets/` mają na końcu `?v=` i numer (obecnie `?v=15`). Po każdej zmianie w `assets/` podnieś ten numer we wszystkich trzech plikach HTML, na przykład:
 
 ```bash
-sed -i '' 's/?v=14/?v=15/g' index.html szkolenie.html gra.html
+sed -i '' 's/?v=15/?v=16/g' index.html szkolenie.html gra.html
 ```
 
 Bez tego przeglądarki odwiedzających będą jeszcze przez jakiś czas używać starych, zapisanych w pamięci podręcznej wersji.
@@ -146,7 +146,7 @@ W świecie gry stoją dwa obiekty, które prowadzą do osobnych gier:
 
 | Obiekt | Gdzie stoi | Dokąd prowadzi |
 |---|---|---|
-| 🚑 Karetka | przed PUNKTEM MEDYCZNYM, współrzędne 50 / 30 | Akademia 112 – pierwsza pomoc i bezpieczeństwo |
+| 🚑 Karetka | przed PUNKTEM MEDYCZNYM, współrzędne 50 / 30 | Akademia 112 – gra leży w katalogu `akademia-112/` tego repozytorium, adres `/akademia-112/` |
 | 🖨️ Hala w kształcie drukarki „OMNI 200” | obok SZKOŁY, współrzędne 24 / −46 | Akademia Dyszy – druk 3D, [mhalaba/akademia-dyszy](https://github.com/mhalaba/akademia-dyszy) |
 
 Gracz podchodzi, wciska **E** (albo przycisk akcji na telefonie) i dostaje okienko z opisem
@@ -163,9 +163,12 @@ const GRY={
 ```
 
 Dopóki `url` jest puste, obiekt stoi w miasteczku i mówi, że gra jeszcze nie ruszyła — nikt
-nie trafia w martwy link. Obie gry to aplikacje Node (WebSocket i serwer), więc nie da się ich
-postawić na GitHub Pages razem z tą stroną; potrzebują własnego hostingu, na przykład Render
-albo Railway, albo — w przypadku Akademii Dyszy — statycznego builda Vite na osobnej subdomenie.
+nie trafia w martwy link.
+
+**Akademia 112 jest już na miejscu.** Pliki gry leżą w katalogu `akademia-112/` i działają pod
+adresem `https://poradnik.punktodpornosci.pl/akademia-112/`, na tym samym darmowym certyfikacie.
+Źródło: [mhalaba/akademia-112](https://github.com/mhalaba/akademia-112). Szczegóły kopiowania
+opisuje `akademia-112/README.md`.
 
 Kliknięcie wysyła zdarzenie pomiaru `dodatkowa_gra` z nazwą gry i informacją, czy adres był
 już ustawiony.

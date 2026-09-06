@@ -112,7 +112,7 @@ function building(w,h,d,c,x,z,label,map){ const b=new THREE.Mesh(new THREE.BoxGe
    Wpisz adres, pod którym dana gra stoi w internecie. Dopóki pole jest puste, obiekt stoi
    w miasteczku i tłumaczy, że gra jeszcze nie ruszyła – nikt nie trafia w martwy link. */
 const GRY={
-  akademia112:{ key:'akademia112', url:'', x:50, z:30, r:4.6, btn:'🚑 Akademia 112',
+  akademia112:{ key:'akademia112', url:'akademia-112/', x:50, z:30, r:4.6, btn:'🚑 Akademia 112',
     tytul:'🚑 Akademia 112',
     opis:'Osobna gra o pierwszej pomocy i bezpieczeństwie. Uczysz się rozpoznać zatrzymanie krążenia, uciskać klatkę w rytmie 100–120 na minutę, zatamować krwotok, zachować się przy podejrzanej paczce i przy dymie w budynku. Są też sygnały alarmowe i ewakuacja. Dla dzieci 10–14 lat, do grania razem.',
     cta:'Wsiadam do karetki →' },
