@@ -20,6 +20,11 @@
    nikt nie miałby jak wyrazić zgody i Analytics zbierałby wyłącznie dane zbiorcze.
    Gdy komunikat Google zacznie działać, nasz baner sam ustępuje mu miejsca.
 */
+/* Numer wersji serwisu. Zmieniaj razem z wpisem w CHANGELOG.md.
+   Pokazuje się w grze (ekran powitalny) i leci z każdym zdarzeniem pomiaru,
+   dzięki czemu w Analytics widać, której wersji dotyczą liczby. */
+window.WERSJA_SERWISU = '1.3.0';
+
 window.ANALYTICS = {
   ga4: "G-G61R23XN76",  // usluga "Poradnik przetrwania" w koncie halabaeu
   cookieless: true      // false = pełny tryb GA z ciasteczkami (wymaga zgody użytkownika)
@@ -179,7 +184,7 @@ window.ANALYTICS = {
 
   /* --- jedna funkcja dla całej strony --- */
   window.track = function(name, data){
-    const d = Object.assign({ wersja: WERSJA, strona: STRONA }, data || {});
+    const d = Object.assign({ wersja: WERSJA, strona: STRONA, wydanie: window.WERSJA_SERWISU }, data || {});
     try { if (ok) gtag('event', name, d); } catch(e){}
     if (DEBUG) { try { console.log('[pomiar]', name, d); debugBox(name, d); } catch(e){} }
   };
