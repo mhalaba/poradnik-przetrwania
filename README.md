@@ -85,10 +85,10 @@ Powroty liczone są lokalnie w przeglądarce, bez ciasteczek. Analytics startuje
 
 ## Po edycji plików podbij numer wersji
 
-Odwołania do plików w `assets/` mają na końcu `?v=` i numer (obecnie `?v=16`). Po każdej zmianie w `assets/` podnieś ten numer we wszystkich trzech plikach HTML, na przykład:
+Odwołania do plików w `assets/` mają na końcu `?v=` i numer (obecnie `?v=17`). Po każdej zmianie w `assets/` podnieś ten numer we wszystkich trzech plikach HTML, na przykład:
 
 ```bash
-sed -i '' 's/?v=16/?v=17/g' index.html szkolenie.html gra.html
+sed -i '' 's/?v=17/?v=18/g' index.html szkolenie.html gra.html
 ```
 
 Bez tego przeglądarki odwiedzających będą jeszcze przez jakiś czas używać starych, zapisanych w pamięci podręcznej wersji.
@@ -139,6 +139,31 @@ otwiera okno zgody ponownie: komunikat Google, jeśli działa, w przeciwnym razi
 **Do zrobienia po stronie serwisu głównego:** strona `punktodpornosci.pl/prywatnosc` twierdzi
 dziś, że serwis nie używa cookies do analityki ani reklamy. Dla subdomeny `poradnik.` to już
 nieprawda, więc tekst trzeba poprawić. Gotowy tekst do wklejenia dostałeś osobno.
+
+## Prowadzenie gracza po miasteczku
+
+Pierwsza wskazówka była krótkim komunikatem, który znikał po kilku sekundach — kto rozglądał się
+po okolicy, ten jej nie przeczytał i nie wiedział, co robić. Teraz działa to tak:
+
+- **Wskazówka stoi na ekranie**, dopóki gracz nie zacznie misji. Podaje numer i nazwę następnej
+  misji, kierunek świata i odległość w metrach, na przykład „Następna misja 0: Wstęp – rozmowa
+  w szkole · na wschód, 67 m". Odległość aktualizuje się w trakcie chodzenia.
+- **Wraca po każdej ukończonej misji**, więc nie ma momentu „i co teraz?".
+- Gdy gracz stanie na znaczniku, tekst zmienia się w „Jesteś na miejscu – wciśnij E".
+- **Na mapie cel to pulsująca gwiazdka**, a nie mała kropka. Gdy cel jest poza zasięgiem mapki,
+  na jej krawędzi pojawia się strzałka wskazująca kierunek.
+- **W świecie 3D nad celem wisi obracająca się strzałka**, a nazwa bieżącej misji jest czytelna
+  ze 170 metrów (pozostałe dopiero z 46).
+
+Odpowiada za to `wskazowka()` w `assets/game.js`, wołana z pętli gry co 0,3 sekundy.
+
+## Książka w tle
+
+Po każdej misji wracał blok „Z książki – rozdział X", co czytało się jak reklama i budziło pytanie
+„o co chodzi z tą książką?". Teraz blok nazywa się **„Zapamiętaj z tej misji"** i zawiera samą
+treść do zapamiętania. Wzmianka o książce dopisuje się pod nim **najwyżej raz na 30 minut**
+(`wzmiankaOksiazce()`, znacznik czasu w `localStorage` pod kluczem `pp_ksiazka_ts`).
+Tytuł książki zniknął też z ekranu powitalnego. Zostaje w stopce stron i na ekranie końcowym.
 
 ## Dwie dodatkowe gry w miasteczku
 
