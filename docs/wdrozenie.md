@@ -33,11 +33,11 @@ W panelu home.pl zmień cztery rekordy A subdomeny z powrotem na `46.242.242.147
 
 ## Po edycji plików podbij numer wersji
 
-Odwołania do plików w `assets/` mają na końcu `?v=` i numer (obecnie `?v=18`). Po każdej zmianie
+Odwołania do plików w `assets/` mają na końcu `?v=` i numer (obecnie `?v=19`). Po każdej zmianie
 w `assets/` podnieś ten numer we wszystkich plikach HTML:
 
 ```bash
-sed -i '' 's/?v=18/?v=19/g' index.html szkolenie.html gra.html akademia-112/index.html akademia-dyszy/index.html
+sed -i '' 's/?v=19/?v=20/g' index.html szkolenie.html gra.html akademia-112/index.html akademia-dyszy/index.html
 ```
 
 Bez tego przeglądarki odwiedzających będą jeszcze przez jakiś czas używać starych wersji
@@ -66,7 +66,8 @@ Przykład: `https://poradnik.punktodpornosci.pl/gra.html?wersja=dzieci&debug=1`
 | `misja_przerwana` | rezygnacja po nieudanej próbie | numer misji |
 | `zobowiazanie` | zaznaczenie planu „jeśli–to" | numer misji |
 | `gra_ukonczona` | wszystkie misje zaliczone | gwiazdki, punkty |
-| `dodatkowa_gra` | podejście do karetki albo hali-drukarki | która gra, czy adres ustawiony |
+| `dodatkowa_gra` | podejście do dowolnej z czterech stacji | która stacja, czy jest dostępna |
+| `stacja_koniec` | ukończenie stacji kompasu albo elektroniki | nazwa stacji, gwiazdki, czy pierwsze przejście |
 | `rozdzial_otwarty` | wejście w rozdział szkolenia | numer i tytuł rozdziału |
 | `quiz_zakonczony` | odpowiedź na ostatnie pytanie | wynik, czy zaliczony |
 | `certyfikat` | wygenerowanie certyfikatu | liczba ukończonych rozdziałów |

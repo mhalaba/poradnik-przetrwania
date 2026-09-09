@@ -42,6 +42,7 @@ pliki HTML, CSS i JavaScript. Postępy zapisują się w pamięci przeglądarki g
 | `assets/content-kids.js` | treść dla dzieci |
 | `assets/szkolenie.js` | silnik szkolenia |
 | `assets/game.js` | silnik gry 3D — cała gra w jednym pliku |
+| `assets/stacje.js` | ćwiczenia stacji kompasu i elektroniki, niezależne od silnika misji |
 | `assets/analytics.js` | pomiar, zgoda RODO, numer wersji serwisu |
 | `assets/ads.js` | jednostki reklamowe AdSense |
 | `assets/style.css` | motyw dorosły i dziecięcy |
@@ -116,9 +117,23 @@ Kamera stoi wysoko nad postacią, ma szeroki kąt (66°) i sama podjeżdża bli�
 zasłania gracza. Minimapa pokazuje drogi, rzekę, budynki, cele misji i kierunek patrzenia.
 Przycisk „? Pomoc" przywraca ekran z instrukcją i listą misji.
 
-## Dwie dodatkowe gry w miasteczku
+## Cztery stacje w miasteczku
 
-W świecie gry stoją dwa obiekty prowadzące do osobnych gier, obie na tym samym serwerze:
+Poza 19 misjami z książki w miasteczku stoją cztery obiekty. Podchodzisz, wciskasz **E**,
+działają w dowolnym momencie i nie przerywają misji — jeśli akurat trwa, ma ona pierwszeństwo.
+
+**Dwie stacje z własnymi ćwiczeniami**, rozgrywanymi na miejscu, bez wychodzenia z miasteczka:
+
+| Stacja | Gdzie | Czego uczy |
+|---|---|---|
+| 🧭 Stacja kompasu | róża wiatrów, −30 / −50 | budowa kompasu, azymut, azymut powrotny, deklinacja, **marsz na azymut w terenie**, orientacja bez sprzętu |
+| ⚡ Warsztat elektroniki | wiata przy stacji energetycznej, −60 / −24 | prawo Ohma, zapas energii w watogodzinach, szeregowo i równolegle, **składanie obwodu**, bezpieczeństwo zasilania awaryjnego |
+
+Treść ćwiczeń leży w [`assets/stacje.js`](assets/stacje.js), osobno od silnika gry.
+Wyniki zapisują się niezależnie od misji, stacje można powtarzać, a kolejność odpowiedzi
+losuje się za każdym razem.
+
+**Dwie stacje prowadzące do osobnych gier**, obu na tym samym serwerze:
 
 | Obiekt | Gdzie | Dokąd |
 |---|---|---|

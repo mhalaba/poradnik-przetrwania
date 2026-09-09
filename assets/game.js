@@ -77,6 +77,9 @@ const P=KIDS?{roof:0xff6b6b,roof2:0xffb347,roof3:0x6bcbff,wall:0xfff4d6,wall2:0x
             :{roof:0x9b4034,roof2:0x7a5a3a,roof3:0x4a5a7a,wall:0xe8dcc2,wall2:0xc9bfae,water:0x2e6f9e,trunk:0x5a3d24,leaf:0x2f6b32,leaf2:0x4f8a3a,block:0xa4a8b5};
 const world=new THREE.Group(); scene.add(world);
 const colliders=[]; const emissiveWindows=[]; const solids=[];
+/* Miejsca, gdzie nie rozsiewamy drzew ani trawy, ale gracz moze po nich chodzic
+   (np. rozeta kompasu wkopana w ziemie). colliders blokowaloby ruch. */
+const bezRoslin=[];
 function box(w,h,d,c,x,y,z,opts){ const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),M(c,opts)); m.position.set(x,y,z); m.castShadow=true; m.receiveShadow=true; world.add(m); return m; }
 const ground=new THREE.Mesh(new THREE.PlaneGeometry(500,500),M(0xffffff,{map:grassT})); ground.rotation.x=-Math.PI/2; ground.receiveShadow=true; world.add(ground);
 const hill=new THREE.Mesh(new THREE.ConeGeometry(24,9,32,4),M(0xffffff,{map:grassT})); hill.position.set(-60,0,-60); hill.castShadow=true; hill.receiveShadow=true; world.add(hill); solids.push(hill);
@@ -135,12 +138,21 @@ const GRY={
     tytul:'🚑 Akademia 112',
     opis:'Osobna gra o pierwszej pomocy i bezpieczeństwie. Uczysz się rozpoznać zatrzymanie krążenia, uciskać klatkę w rytmie 100–120 na minutę, zatamować krwotok, zachować się przy podejrzanej paczce i przy dymie w budynku. Są też sygnały alarmowe i ewakuacja. Dla dzieci 10–14 lat, do grania razem.',
     cta:'Wsiadam do karetki →' },
+  kompas:{ key:'stacja_kompas', stacja:'kompas', x:-30, z:-50, r:5.4, btn:'🧭 Stacja kompasu',
+    tytul:'🧭 Stacja kompasu',
+    opis:'Wielka róża wiatrów wkopana w ziemię. Igła w środku naprawdę pokazuje północ tego świata. Nauczysz się czytać azymut, liczyć drogę powrotną, poprawiać deklinację i przejdziesz odcinek na azymut w terenie — z kompasem w rogu ekranu, bez znacznika na mapie.',
+    cta:'Staję przy róży wiatrów →' },
+  elektronika:{ key:'stacja_elektronika', stacja:'elektronika', x:-60, z:-24, r:6.4, btn:'⚡ Warsztat elektroniki',
+    tytul:'⚡ Warsztat elektroniki',
+    opis:'Wiata z ławą warsztatową, panelem słonecznym i wielkim rezystorem przy wejściu. Prawo Ohma, liczenie zapasu energii w watogodzinach, łączenie ogniw szeregowo i równolegle, składanie obwodu, który nie spali diody, oraz zasady, dzięki którym agregat nie zabije nikogo czadem.',
+    cta:'Wchodzę do warsztatu →' },
   dysza:{ key:'akademia_dyszy', url:'akademia-dyszy/', x:24, z:-46, r:6.2, btn:'🖨️ Akademia Dyszy',
     tytul:'🖨️ Akademia Dyszy',
     opis:'Osobna gra-kampus o druku 3D. Lekcje o drukarce, filamencie, fizyce i matematyce wydruku, laboratoria (zużycie nitki, wysokość warstwy, skala, układ współrzędnych), quizy, egzamin i dyplom. Dla uczniów 10–14 lat, program STEAM.',
     cta:'Wchodzę do hali →' }
 };
-const AMB=GRY.akademia112, DYSZA=GRY.dysza;
+const AMB=GRY.akademia112, DYSZA=GRY.dysza, KOMP=GRY.kompas, ELEK=GRY.elektronika;
+if(!state.stacje) state.stacje={};
 
 const HOME=[-20,-30];
 house(HOME[0],HOME[1],0,P.wall,P.roof,1,T('Dom Nowaków','Twój dom'));
@@ -206,15 +218,101 @@ let dyszaHead=null, dyszaGantry=null;
   colliders.push({x:DYSZA.x-5.2,z:DYSZA.z-4.7,w:10.4,d:9.4});
   makeLabel('🖨️ AKADEMIA DYSZY',DYSZA.x,13.6,DYSZA.z,1,'rgba(20,40,70,.72)',130);
 }
+
+/* ---------- STACJA KOMPASU: rozeta wiatrow wkopana w ziemie ---------- */
+let kompasIgla=null;
+{ const g=new THREE.Group();
+  const kamien=M(0xb9b3a6,{roughness:.9});
+  const plyta=new THREE.Mesh(new THREE.CylinderGeometry(6.6,6.8,.4,48),kamien); plyta.position.y=.2; plyta.receiveShadow=true; g.add(plyta);
+  const obrecz=new THREE.Mesh(new THREE.TorusGeometry(5.4,.2,8,48),M(0x2c3441,{metalness:.4,roughness:.5})); obrecz.rotation.x=Math.PI/2; obrecz.position.y=.42; g.add(obrecz);
+  // promienie rozy wiatrow: 4 glowne dlugie, 4 posrednie krotsze
+  for(let i=0;i<8;i++){
+    const glowny=i%2===0, dl=glowny?5:3.2;
+    const r=new THREE.Mesh(new THREE.BoxGeometry(.5,.06,dl),M(glowny?0x1d2733:0x8d99a8));
+    r.position.set(Math.sin(i*Math.PI/4)*dl/2,.42,-Math.cos(i*Math.PI/4)*dl/2);
+    r.rotation.y=i*Math.PI/4; g.add(r);
+  }
+  // litery kierunkow na kamieniach, obrocone do srodka
+  [['N',0,0xd63a3a],['E',90,0x2c3441],['S',180,0x2c3441],['W',270,0x2c3441]].forEach(([lit,st,kol])=>{
+    const t=tex(128,128,(c,w,h)=>{ c.fillStyle='#efeae0'; c.fillRect(0,0,w,h); c.fillStyle='#'+kol.toString(16).padStart(6,'0');
+      c.font='bold 92px Nunito, Inter, sans-serif'; c.textAlign='center'; c.textBaseline='middle'; c.fillText(lit,w/2,h/2+4); });
+    const a=st*Math.PI/180;
+    const sl=new THREE.Mesh(new THREE.BoxGeometry(1.5,1.7,.22),[M(0xefeae0),M(0xefeae0),M(0xefeae0),M(0xefeae0),new THREE.MeshStandardMaterial({map:t,roughness:.8}),M(0xefeae0)]);
+    sl.position.set(Math.sin(a)*7.7,.85,-Math.cos(a)*7.7); sl.rotation.y=a+Math.PI; sl.castShadow=true; g.add(sl);
+  });
+  // igla: czerwony grot na polnoc, bialy na poludnie. W tym swiecie polnoc to -Z.
+  kompasIgla=new THREE.Group();
+  const pn=new THREE.Mesh(new THREE.ConeGeometry(.55,4.6,4),M(0xd63a3a,{roughness:.4}));
+  pn.rotation.x=-Math.PI/2; pn.position.z=-2.3; kompasIgla.add(pn);
+  const pd=new THREE.Mesh(new THREE.ConeGeometry(.55,4.6,4),M(0xe8eef7,{roughness:.4}));
+  pd.rotation.x=Math.PI/2; pd.position.z=2.3; kompasIgla.add(pd);
+  kompasIgla.position.y=1.15; g.add(kompasIgla);
+  const os=new THREE.Mesh(new THREE.CylinderGeometry(.5,.7,1.3,16),M(0x39424f,{metalness:.5,roughness:.4})); os.position.y=.6; os.castShadow=true; g.add(os);
+  g.position.set(KOMP.x,0,KOMP.z); world.add(g);
+  // po rozecie mozna chodzic, wiec nie dodajemy kolizji - tylko blokujemy roslinnosc
+  bezRoslin.push({x:KOMP.x-8.5,z:KOMP.z-8.5,w:17,d:17});
+  colliders.push({x:KOMP.x-.9,z:KOMP.z-.9,w:1.8,d:1.8});
+  makeLabel('🧭 STACJA KOMPASU',KOMP.x,4.6,KOMP.z,1,'rgba(30,50,80,.72)',130);
+}
+
+/* ---------- WARSZTAT ELEKTRONIKI: wiata z lawa, panelem i wielkim rezystorem ---------- */
+let elekZarowka=null, elekIskra=null;
+{ const g=new THREE.Group();
+  const beton=M(0x9aa1a8,{roughness:.95}), stal=M(0x8a929c,{metalness:.5,roughness:.35});
+  const plyta=new THREE.Mesh(new THREE.BoxGeometry(12,.4,10),beton); plyta.position.y=.2; plyta.receiveShadow=true; g.add(plyta);
+  [[-5.2,-4.2],[5.2,-4.2],[-5.2,4.2],[5.2,4.2]].forEach(([x,z])=>{ const sl=new THREE.Mesh(new THREE.BoxGeometry(.5,5,.5),stal); sl.position.set(x,2.9,z); sl.castShadow=true; g.add(sl); });
+  const dach=new THREE.Mesh(new THREE.BoxGeometry(12.6,.4,10.6),M(0x4a5360,{roughness:.7})); dach.position.y=5.6; dach.rotation.z=.12; dach.castShadow=true; g.add(dach);
+  // panel sloneczny na dachu
+  const panelT=tex(128,128,(c,w,h)=>{ c.fillStyle='#16305a'; c.fillRect(0,0,w,h); c.strokeStyle='rgba(160,200,255,.55)'; c.lineWidth=3;
+    for(let i=0;i<=4;i++){ c.beginPath(); c.moveTo(i*w/4,0); c.lineTo(i*w/4,h); c.stroke(); c.beginPath(); c.moveTo(0,i*h/4); c.lineTo(w,i*h/4); c.stroke(); } });
+  const panel=new THREE.Mesh(new THREE.BoxGeometry(7,.25,4.4),new THREE.MeshStandardMaterial({map:panelT,roughness:.25,metalness:.35}));
+  panel.position.set(-1,6.35,-1.4); panel.rotation.z=.12; panel.rotation.x=-.28; panel.castShadow=true; g.add(panel);
+  // lawa warsztatowa
+  const lawa=new THREE.Mesh(new THREE.BoxGeometry(7.5,.35,2.6),M(0x8b5a2b,{roughness:.8})); lawa.position.set(0,2.05,2.4); lawa.castShadow=true; g.add(lawa);
+  [-3.3,3.3].forEach(x=>{ const n=new THREE.Mesh(new THREE.BoxGeometry(.35,1.9,2.2),stal); n.position.set(x,1.05,2.4); g.add(n); });
+  // akumulator i przewody na lawie
+  const akum=new THREE.Mesh(new THREE.BoxGeometry(1.9,1.2,1.2),M(0x1f2731)); akum.position.set(-2.4,2.8,2.4); akum.castShadow=true; g.add(akum);
+  [[-2.9,0xd63a3a],[-1.9,0x2c3441]].forEach(([x,kol])=>{ const b=new THREE.Mesh(new THREE.CylinderGeometry(.16,.16,.35,10),M(kol)); b.position.set(x,3.55,2.4); g.add(b); });
+  // zarowka pod dachem, pulsuje jak dzialajacy uklad
+  elekZarowka=new THREE.Mesh(new THREE.SphereGeometry(.6,14,12),new THREE.MeshStandardMaterial({color:0xfff3c4,emissive:0xffcc55,emissiveIntensity:1,roughness:.3}));
+  elekZarowka.position.set(2.6,4.4,2.2); g.add(elekZarowka);
+  const opr=new THREE.Mesh(new THREE.CylinderGeometry(.16,.16,.9,10),stal); opr.position.set(2.6,5.1,2.2); g.add(opr);
+  elekIskra=new THREE.PointLight(0xffcc66,1.1,12,2); elekIskra.position.set(2.6,4.4,2.2); g.add(elekIskra);
+  // wielki rezystor przy wejsciu: 470 om, kod paskowy zolty-fioletowy-brazowy-zloty
+  { const r=new THREE.Group();
+    const korpus=new THREE.Mesh(new THREE.CylinderGeometry(1.05,1.05,4.4,20),M(0xf0e6cf,{roughness:.75}));
+    korpus.rotation.z=Math.PI/2; korpus.castShadow=true; r.add(korpus);
+    // kod paskowy 470 om: zolty-fioletowy-brazowy, zloty pasek tolerancji
+    [[-1.3,0xd99000],[-.5,0x4b1f6e],[.3,0x3d2410],[1.5,0xb8860b]].forEach(([x,kol])=>{
+      const p=new THREE.Mesh(new THREE.CylinderGeometry(1.16,1.16,.7,20),M(kol,{roughness:.45}));
+      p.rotation.z=Math.PI/2; p.position.x=x; r.add(p); });
+    // tabliczka z wartoscia - kod paskowy przestaje byc zagadka
+    { const t=tex(256,128,(c,w,h)=>{ c.fillStyle='#12202f'; c.fillRect(0,0,w,h);
+        c.fillStyle='#ffc857'; c.font='bold 62px Nunito, Inter, sans-serif'; c.textAlign='center'; c.textBaseline='middle';
+        c.fillText('470 Ω',w/2,h/2-14);
+        c.fillStyle='#9fb2d4'; c.font='600 26px Nunito, Inter, sans-serif';
+        c.fillText('żółty-fiolet-brąz',w/2,h/2+34); });
+      const tab=new THREE.Mesh(new THREE.PlaneGeometry(3,1.5),new THREE.MeshStandardMaterial({map:t,roughness:.7}));
+      tab.position.set(0,-1.9,1.15); r.add(tab); }
+    [-3.1,3.1].forEach(x=>{ const d=new THREE.Mesh(new THREE.CylinderGeometry(.14,.14,1.8,10),M(0xb9bec7,{metalness:.6,roughness:.3}));
+      d.rotation.z=Math.PI/2; d.position.x=x; r.add(d); });
+    [-2.2,2.2].forEach(x=>{ const n=new THREE.Mesh(new THREE.BoxGeometry(.3,2.6,.3),stal); n.position.set(x,-1.3,0); r.add(n); });
+    r.position.set(0,3.1,6.6); g.add(r);
+  }
+  g.position.set(ELEK.x,0,ELEK.z); world.add(g);
+  colliders.push({x:ELEK.x-6.2,z:ELEK.z-5.2,w:12.4,d:10.4});
+  makeLabel('⚡ WARSZTAT ELEKTRONIKI',ELEK.x,8.4,ELEK.z,1,'rgba(70,50,10,.74)',130);
+}
 box(6,.6,.6,0x6b5a45,24,.3,38).rotation.y=.5; box(5,.6,.6,0x6b5a45,14,.3,40).rotation.y=-.4; { const mud=new THREE.Mesh(new THREE.CircleGeometry(9,24),M(0x5a4a3a)); mud.rotation.x=-Math.PI/2; mud.position.set(18,.035,40); world.add(mud); }
 { const plaza=new THREE.Mesh(new THREE.CircleGeometry(9,28),M(KIDS?0xffe9c2:0x9a9384)); plaza.rotation.x=-Math.PI/2; plaza.position.set(-20,.035,30); world.add(plaza); box(2.4,.5,.8,0x8b5a2b,-24,.7,30); box(2.4,.5,.8,0x8b5a2b,-16,.7,30); makeLabel('PLAC SĄSIEDZKI – MIEJSCE A',-20,5,30,.85,undefined,70); }
 for(let i=0;i<8;i++) tree(38+Math.cos(i*.8)*9,55+Math.sin(i*.8)*8,1+Math.random()*.4);
-for(let i=0;i<90;i++){ const x=(Math.random()-.5)*230,z=(Math.random()-.5)*230; if(Math.abs(z-45)<11||Math.abs(x)<5&&z<60||Math.abs(z+10)<5||Math.abs(x+40)<5&&z>-20&&z<50) continue; if(Math.hypot(x+60,z+60)<26) continue; if(colliders.some(c=>x>c.x-3&&x<c.x+c.w+3&&z>c.z-3&&z<c.z+c.d+3)) continue; tree(x,z,.8+Math.random()*.8); }
+for(let i=0;i<90;i++){ const x=(Math.random()-.5)*230,z=(Math.random()-.5)*230; if(Math.abs(z-45)<11||Math.abs(x)<5&&z<60||Math.abs(z+10)<5||Math.abs(x+40)<5&&z>-20&&z<50) continue; if(Math.hypot(x+60,z+60)<26) continue; if(colliders.some(c=>x>c.x-3&&x<c.x+c.w+3&&z>c.z-3&&z<c.z+c.d+3)) continue; if(bezRoslin.some(c=>x>c.x-3&&x<c.x+c.w+3&&z>c.z-3&&z<c.z+c.d+3)) continue; tree(x,z,.8+Math.random()*.8); }
 for(let i=0;i<8;i++) tree(-60+Math.cos(i*.8)*12,-60+Math.sin(i*.8)*12,.6);
 makeLabel('WZGÓRZE – BEZPIECZNE MIEJSCE',-60,13,-60,1.2,undefined,150);
 const lamps=[]; for(let z=-70;z<=30;z+=20){ lamps.push(lamp(4,z)); lamps.push(lamp(-4,z+10)); } for(let x=-70;x<=70;x+=20) lamps.push(lamp(x,-6));
 /* dekoracje terenu */
-const freeSpot=(x,z)=>{ if(Math.abs(z-45)<12) return false; if(Math.abs(x)<4.5&&z<60) return false; if(Math.abs(z+10)<4.5) return false; if(Math.abs(x+40)<4.5&&z>-20&&z<50) return false; if(Math.hypot(x+60,z+60)<26) return false; return !colliders.some(c=>x>c.x-2&&x<c.x+c.w+2&&z>c.z-2&&z<c.z+c.d+2); };
+const freeSpot=(x,z)=>{ if(Math.abs(z-45)<12) return false; if(Math.abs(x)<4.5&&z<60) return false; if(Math.abs(z+10)<4.5) return false; if(Math.abs(x+40)<4.5&&z>-20&&z<50) return false; if(Math.hypot(x+60,z+60)<26) return false; if(bezRoslin.some(c=>x>c.x-2&&x<c.x+c.w+2&&z>c.z-2&&z<c.z+c.d+2)) return false;
+  return !colliders.some(c=>x>c.x-2&&x<c.x+c.w+2&&z>c.z-2&&z<c.z+c.d+2); };
 function scatter(geo,color,count,y){ const mesh=new THREE.InstancedMesh(geo,M(color),count); const d=new THREE.Object3D(); let n=0,guard=0; while(n<count&&guard<count*40){ guard++; const x=(Math.random()-.5)*210,z=(Math.random()-.5)*210; if(!freeSpot(x,z)) continue; d.position.set(x,y,z); d.rotation.y=Math.random()*6.28; d.scale.setScalar(.7+Math.random()*.8); d.updateMatrix(); mesh.setMatrixAt(n++,d.matrix); } mesh.count=n; mesh.instanceMatrix.needsUpdate=true; mesh.receiveShadow=true; world.add(mesh); return mesh; }
 [[0xffffff,80],[0xffe066,80],[KIDS?0xff8fb1:0xc98fa8,55]].forEach(([c,n])=>scatter(new THREE.ConeGeometry(.16,.5,5),c,n,.25));
 scatter(new THREE.SphereGeometry(.85,7,6),KIDS?0x4fb84f:0x39602f,50,.6);
@@ -333,6 +431,46 @@ function collides(x,z){ if(Math.abs(z-45)<8&&Math.abs(x)>4&&!floodMode) return t
 /* ---------- STAN ---------- */
 let near=null,nearPick=null,nearNpc=null,nearGame=null,panelOpen=false,floodMode=false,floodLevel=-1,floodT=0,dropWait=false,tapMode=false,night=false,last=performance.now();
 let quest=null,target=null,timedRun=false,timedT=0,timedStep=null,timedIdx=0;
+/* Marsz na azymut ze stacji kompasu. Gracz idzie po kompasie w rogu ekranu,
+   bez znacznika na mapie, i sam decyduje, kiedy jest na miejscu. */
+const marsz={aktywny:false,az:0,dyst:0,cx:0,cz:0,lx:0,lz:0,przeszedl:0,then:null};
+let kompasBox=null,kompasCv=null,kompasCtx=null,kompasInfo=null;
+function kursGracza(){ return ((180-yaw*180/Math.PI)%360+360)%360; }
+function budujKompas(){
+  if(kompasBox) return;
+  kompasBox=document.createElement('div');
+  kompasBox.style.cssText='position:fixed;left:14px;top:50%;transform:translateY(-50%);z-index:6;display:none;text-align:center;pointer-events:none';
+  kompasCv=document.createElement('canvas'); kompasCv.width=132; kompasCv.height=132;
+  kompasCv.style.cssText='display:block;filter:drop-shadow(0 6px 18px rgba(0,0,0,.45))';
+  kompasInfo=document.createElement('div');
+  kompasInfo.style.cssText='margin-top:6px;background:rgba(10,18,32,.86);color:#e8eefc;border:1px solid rgba(255,255,255,.16);border-radius:10px;padding:5px 9px;font:700 .78rem/1.35 Nunito,Inter,sans-serif;white-space:nowrap';
+  kompasBox.appendChild(kompasCv); kompasBox.appendChild(kompasInfo);
+  document.body.appendChild(kompasBox);
+  kompasCtx=kompasCv.getContext('2d');
+}
+function startMarsz(cfg,then){
+  budujKompas();
+  const px=player.position.x, pz=player.position.z, a=cfg.azymut*Math.PI/180;
+  marsz.aktywny=true; marsz.az=cfg.azymut; marsz.dyst=cfg.dystans; marsz.then=then;
+  marsz.cx=px+Math.sin(a)*cfg.dystans; marsz.cz=pz-Math.cos(a)*cfg.dystans;
+  marsz.lx=px; marsz.lz=pz; marsz.przeszedl=0;
+  kompasBox.style.display='block';
+  close();
+  pokazCel('🧭 '+cfg.opis+'<br><b>'+T('Gdy uznasz, że jesteś na miejscu, wciśnij E.','Na miejscu wciśnij E albo przycisk na dole.')+'</b>');
+  toast(T('Obróć się tak, żeby żółta strzałka stanęła na samej górze kompasu.','Kręć się, aż żółta strzałka będzie na górze!'));
+}
+function konczMarsz(){
+  const blad=Math.hypot(player.position.x-marsz.cx,player.position.z-marsz.cz);
+  marsz.aktywny=false; if(kompasBox) kompasBox.style.display='none';
+  celHtml=null; pokazCel('');
+  const f=marsz.then; marsz.then=null; if(f) f(blad);
+}
+function rysujKompasHud(){
+  if(!kompasCtx||!window.KOMPAS_RYSUJ) return;
+  const kurs=kursGracza();
+  window.KOMPAS_RYSUJ(kompasCtx,132,{kurs:kurs,cel:marsz.az,marsz:true});
+  kompasInfo.innerHTML='azymut <b>'+marsz.az+'°</b> · idziesz <b>'+Math.round(kurs)+'°</b><br>przeszedłeś <b>'+Math.round(marsz.przeszedl)+' m</b> z '+marsz.dyst+' m';
+}
 const objEl=document.createElement('div'); objEl.style.cssText='position:fixed;left:14px;top:110px;z-index:5;max-width:min(380px,80vw);pointer-events:none'; document.body.appendChild(objEl);
 let celHtml=null;
 function pokazCel(html){ if(html===celHtml) return; celHtml=html; objEl.innerHTML=html?'<div class="pill" style="display:block;white-space:normal;line-height:1.35;border-left:4px solid var(--accent)">'+html+'</div>':''; }
@@ -410,16 +548,19 @@ function loop(now){ requestAnimationFrame(loop); if(canvas.width!==Math.floor(in
     near=null; nearPick=null; nearNpc=null;
     if(!quest){ for(const m of MISSIONS){ if(Math.hypot(player.position.x-m.pos[0],player.position.z-m.pos[1])<3.4){ near=m; break; } } }
     else { const st=quest.steps[quest.i]; if(st&&(st.type==='collect'||timedRun)){ for(const p of pickups){ if(!p.taken&&Math.hypot(player.position.x-p.x,player.position.z-p.z)<2.2){ nearPick=p; break; } } } if(st&&(st.type==='goto'||st.type==='talk')&&target&&Math.hypot(player.position.x-target.x,player.position.z-target.z)<target.r) nearNpc=st; }
-    nearGame=null; if(!quest&&!near){ for(const k in GRY){ const gg=GRY[k]; if(Math.hypot(player.position.x-gg.x,player.position.z-gg.z)<gg.r){ nearGame=gg; break; } } }
-    const ab=$('#actBtn'); if(near){ ab.style.display='block'; const locked=!state.done[near.id]&&!MISSIONS.filter(x=>x.id<near.id).every(x=>state.done[x.id]); ab.textContent=locked?'🔒 Najpierw poprzednie misje':(state.done[near.id]?'🔁 Powtórz: ':'▶ ')+near.name+' (E)'; } else if(nearPick){ ab.style.display='block'; ab.textContent='✋ '+nearPick.name+' (E)'; } else if(nearNpc){ ab.style.display='block'; ab.textContent=(nearNpc.type==='talk'?'💬 Rozmawiaj':'✅ '+(nearNpc.action||'Wykonaj'))+' (E)'; } else if(nearGame){ ab.style.display='block'; ab.textContent=nearGame.btn+' (E)'; } else ab.style.display='none';
+    nearGame=null; if(!quest&&!near&&!marsz.aktywny){ for(const k in GRY){ const gg=GRY[k]; if(Math.hypot(player.position.x-gg.x,player.position.z-gg.z)<gg.r){ nearGame=gg; break; } } }
+    const ab=$('#actBtn'); if(marsz.aktywny){ ab.style.display='block'; ab.textContent=T('📍 Tu jestem (E)','📍 Jestem na miejscu (E)'); } else if(near){ ab.style.display='block'; const locked=!state.done[near.id]&&!MISSIONS.filter(x=>x.id<near.id).every(x=>state.done[x.id]); ab.textContent=locked?'🔒 Najpierw poprzednie misje':(state.done[near.id]?'🔁 Powtórz: ':'▶ ')+near.name+' (E)'; } else if(nearPick){ ab.style.display='block'; ab.textContent='✋ '+nearPick.name+' (E)'; } else if(nearNpc){ ab.style.display='block'; ab.textContent=(nearNpc.type==='talk'?'💬 Rozmawiaj':'✅ '+(nearNpc.action||'Wykonaj'))+' (E)'; } else if(nearGame){ ab.style.display='block'; const gwS=nearGame.stacja?(state.stacje[nearGame.stacja]||0):0; ab.textContent=nearGame.btn+(gwS?' '+'⭐'.repeat(gwS):'')+' (E)'; } else ab.style.display='none';
   }
-  if(!quest&&!panelOpen){ celTik+=dt; if(celTik>.3){ celTik=0; wskazowka(); } }
+  if(marsz.aktywny){ const mdx=player.position.x-marsz.lx, mdz=player.position.z-marsz.lz;
+    marsz.przeszedl+=Math.hypot(mdx,mdz); marsz.lx=player.position.x; marsz.lz=player.position.z; rysujKompasHud(); }
+  if(!quest&&!panelOpen&&!marsz.aktywny){ celTik+=dt; if(celTik>.3){ celTik=0; wskazowka(); } }
   if(moving&&hintEl&&!hintHidden){ hintHidden=true; hintEl.style.transition='opacity .6s'; hintEl.style.opacity='0'; setTimeout(()=>{ if(hintHidden) hintEl.style.display='none'; },700); }
   walkT+=dt*(moving?10:0); const u=player.userData; const sw=moving?Math.sin(walkT)*.6:0; u.legL.rotation.x=sw; u.legR.rotation.x=-sw; u.armL.rotation.x=-sw; u.armR.rotation.x=sw;
   npcs.forEach((n,i)=>{ if(n.mesh.userData.tail) n.mesh.userData.tail.rotation.y=Math.sin(t*8)*.5; else if(n.id!=='ofiara'){ n.mesh.position.y=Math.sin(t*2+i)*.03; n.mesh.userData.armL.rotation.x=Math.sin(t*1.5+i)*.15; } });
   MISSIONS.forEach((m,i)=>{ m.ring.rotation.z=t*2; m.lab.position.y=6.8+Math.sin(t*2+i)*.2; if(m.strzalka&&m.strzalka.visible){ m.strzalka.position.y=9.2+Math.sin(t*3)*.5; m.strzalka.rotation.y=t*1.6; } });
   pickups.forEach((p,i)=>{ if(!p.taken){ p.mesh.children[0].rotation.y=t*2; p.mesh.children[0].position.y=1+Math.sin(t*3+i)*.15; } });
   { const bl=(Math.sin(t*7)+1)/2; ambLights.forEach((l,i)=>{ l.material.emissiveIntensity=(i?bl:1-bl)*1.6+.15; }); }
+  if(elekZarowka){ const puls=.75+Math.sin(t*2.2)*.25; elekZarowka.material.emissiveIntensity=puls*1.4; if(elekIskra) elekIskra.intensity=puls*1.3; }
   if(dyszaHead){ dyszaHead.position.x=Math.sin(t*.9)*3.4; dyszaHead.position.z=Math.sin(t*.37)*2.6; if(dyszaGantry) dyszaGantry.position.z=dyszaHead.position.z; }
   clouds.forEach(c=>{ c.position.x+=c.userData.v*dt*2; if(c.position.x>180) c.position.x=-180; });
   const pa=riverGeo.attributes.position.array; for(let i=0;i<pa.length;i+=3){ pa[i+2]=Math.sin(riverBase[i]*.15+t*1.5)*.18+Math.cos(riverBase[i+1]*.4+t)*.08; } riverGeo.attributes.position.needsUpdate=true;
@@ -470,13 +611,44 @@ function runStep(){ const st=quest.steps[quest.i]; target=null; if(!timedRun) cl
     case 'rain': rain.visible=st.on; nextStep(); break;
     case 'end': finishQuest(st); break;
   } }
-function interact(){ if(nearGame&&!quest&&!near){ showGra(nearGame); return; } if(near&&!quest){ startMission(near); return; } if(!quest) return; const st=quest.steps[quest.i]; if(!st) return;
+function interact(){ if(marsz.aktywny){ konczMarsz(); return; } if(nearGame&&!quest&&!near){ showGra(nearGame); return; } if(near&&!quest){ startMission(near); return; } if(!quest) return; const st=quest.steps[quest.i]; if(!st) return;
   if(timedRun&&nearPick){ const p=nearPick; const want=timedStep.points[timedIdx]; if(p.idx===timedIdx){ p.taken=true; scene.remove(p.mesh); pick(); toast('✅ '+want.name+(want.why?' – '+want.why:'')); timedIdx++; if(timedIdx>=timedStep.points.length) endTimed(true); else setObjective('Krok '+(timedIdx+1)+'/'+timedStep.points.length+': '+timedStep.points[timedIdx].name); } else { bad(); updateCalm(-4); timedT-=5; toast('❌ Nie ta kolejność! Teraz: '+want.name+' (−5 s)'); } return; }
   if(st.type==='collect'&&nearPick){ const p=nearPick; p.taken=true; scene.remove(p.mesh); const need=st.items.filter(i=>i.good).length; if(p.good){ quest.got++; pick(); setObjective(st.obj+' ('+quest.got+'/'+need+')'); toast('✅ '+p.name+(p.why?' – '+p.why:'')); if(quest.got>=need) setTimeout(nextStep,600); } else { bad(); updateCalm(-3); toast('🚫 '+p.name+': '+p.why); quest.stars=Math.max(1,quest.stars-1); } }
   else if(st.type==='goto'&&nearNpc){ good(); if(st.msg) toast(st.msg); nextStep(); }
   else if(st.type==='talk'&&nearNpc) showTalk(st); }
-function showGra(g){ TR('dodatkowa_gra',{gra:g.key,dostepna:!!g.url});
+function gwiazdkiHtml(n){ return '<div class="stars">'+'⭐'.repeat(n)+'☆'.repeat(3-n)+'</div>'; }
+/* Ekran koncowy stacji: zapis najlepszego wyniku, punkty i to, co zostaje w glowie. */
+function koniecStacji(id,gw,html){
+  const stara=state.stacje[id]||0, pierwsze=!stara;
+  state.stacje[id]=Math.max(stara,gw);
+  const zdobyte=pierwsze?80+gw*30:Math.round((80+gw*30)/4);
+  state.score+=zdobyte; updateCalm(4); save(); refreshBeacons(); good();
+  TR('stacja_koniec',{stacja:id,gwiazdki:gw,pierwsze_przejscie:pierwsze});
+  open('<h2>'+T('✅ Stacja zaliczona','🎉 Stacja zaliczona!')+'</h2>'+gwiazdkiHtml(gw)+html
+    +'<p><b>+'+zdobyte+' pkt</b>'+(pierwsze?'':' '+T('(powtórka)','(powtórka)'))+'</p>'
+    +'<div class="navbtns" style="justify-content:center"><button class="btn primary" id="wrotGra">Wracam do miasteczka</button>'
+    +'<button class="btn ghost" id="jeszczeRaz">Jeszcze raz</button></div>');
+  $('#wrotGra').onclick=()=>{ close(); wskazowka(); };
+  $('#jeszczeRaz').onclick=()=>uruchomStacje(id);
+}
+function uruchomStacje(id){
+  const f=window.STACJE_GRY&&window.STACJE_GRY[id];
+  if(!f){ toast('Ta stacja jeszcze nie ma gry.'); return; }
+  f({ open:open, close:close, T:T, KIDS:KIDS, beep:beep, good:good, bad:bad, toast:toast,
+      marsz:startMarsz, koniec:koniecStacji });
+}
+function showGra(g){ TR('dodatkowa_gra',{gra:g.key,dostepna:!!(g.url||g.stacja)});
   const wroc='<button class="btn ghost" id="wrotGra">Wracam do miasteczka</button>';
+  if(g.stacja){
+    const gw=state.stacje[g.stacja]||0;
+    open('<h2>'+g.tytul+'</h2><p>'+g.opis+'</p>'
+      +(gw?'<div class="msg good"><b>Zaliczona.</b> Najlepszy wynik: '+'⭐'.repeat(gw)+'. Możesz powtórzyć – zadania losują się na nowo.</div>':'')
+      +'<p class="small">'+T('Ćwiczenie zostaje w miasteczku – nic się nie otwiera w nowej karcie.','Wszystko dzieje się tutaj, w miasteczku.')+'</p>'
+      +'<div class="navbtns" style="justify-content:center"><button class="btn primary" id="startStacji">'+g.cta+'</button>'+wroc+'</div>');
+    $('#startStacji').onclick=()=>uruchomStacje(g.stacja);
+    $('#wrotGra').onclick=close;
+    return;
+  }
   open('<h2>'+g.tytul+'</h2><p>'+g.opis+'</p>'+(g.url
     ? '<p class="small">Gra otworzy się w nowej karcie. Miasteczko zostaje tu, gdzie jesteś.</p><div class="navbtns" style="justify-content:center"><a class="btn primary" href="'+g.url+'" target="_blank" rel="noopener">'+g.cta+'</a>'+wroc+'</div>'
     : '<div class="msg"><b>Ta gra jeszcze nie stoi w internecie.</b> Kod jest gotowy, brakuje adresu. Gdy tylko będzie, ten obiekt zacznie do niej prowadzić.</div><div class="navbtns" style="justify-content:center">'+wroc+'</div>'));
@@ -707,9 +879,9 @@ function buildSteps(m){ const ch=DATA[m.id]; const D=[];
 /* ---------- LISTA / INTRO / KONIEC ---------- */
 function missionList(){ return '<div class="missions">'+MISSIONS.map(m=>'<div class="'+(state.done[m.id]?'ok':'')+'">'+m.icon+' '+m.id+'. '+m.name+(state.done[m.id]?' '+'⭐'.repeat(state.done[m.id]):'')+'</div>').join('')+'</div>'; }
 $('#listBtn').onclick=()=>{ if(quest){ open('<h2>Trwa misja</h2><p>'+quest.mission.name+'</p><div class="navbtns"><button class="btn ghost" id="ab">Przerwij misję</button><button class="btn primary" id="cl">Kontynuuj</button></div>'); $('#cl').onclick=close; $('#ab').onclick=()=>{ abortQuest(); close(); }; return; } open('<h2>📋 Misje – rozdziały książki</h2><p class="small">Misje odblokowują się po kolei (złoty znacznik = następna). Zielone – ukończone.</p>'+missionList()+'<div class="navbtns"><button class="btn ghost" id="rs">Zeruj postępy</button><button class="btn primary" id="cl">Zamknij</button></div>'); $('#cl').onclick=close; $('#rs').onclick=()=>{ if(confirm('Wyzerować postępy gry?')){ state={done:{},score:0,calm:80}; save(); refreshBeacons(); close(); } }; };
-function showIntro(){ open('<div id="intro"><div style="font-size:3rem">'+(KIDS?'🧒🎮':'🧭🎮')+'</div><h2>'+T('Rodzina Nowaków: 19 misji przetrwania','Miasteczko Małego Strażnika')+'</h2><p>'+T('Jesteś koordynatorem rodziny: Ania, Zosia (8 l.), dziadek Józef (79 l.) i pies Burek. Dom 300 m od rzeki. Przejdziesz przez wszystkie rozdziały poradnika: od analizy ryzyka, przez zapasy, syreny, ewakuację, blackout i powódź, aż po odbudowę. Każde zadanie wykonujesz naprawdę: idziesz, szukasz, decydujesz, ćwiczysz refleks i oddech.','Mieszkasz z mamą Anią, dziadkiem Józefem i psem Burkiem. Zostaniesz Małym Strażnikiem Bezpieczeństwa: pakujesz plecak, słuchasz syren, budujesz bazę, uciekasz przed wodą na górkę i łapiesz fake newsy. Za każdą misję – gwiazdki i odznaka!')+'</p><p class="small"><b>Wskaźnik spokoju:</b> '+T('złe decyzje podnoszą stres, oddech 4-7-8 go obniża. Panika bywa groźniejsza niż kryzys.','gdy się boisz, oddychaj jak na gorącą zupę – wskaźnik rośnie!')+'</p><p class="small"><b>Sterowanie:</b> WASD / strzałki – ruch · przeciągnij myszą lub Q – obrót kamery · <b>kółko myszy, klawisze + / − lub przyciski z boku – przybliżanie</b> (0 = widok domyślny) · E lub przycisk – działanie.<br>Telefon: joystick po lewej, przeciąganie – kamera, <b>szczypanie dwoma palcami – zoom</b>.</p>'+missionList()+'<p class="small" style="opacity:.55;text-align:center;margin-top:14px">Miasteczko '+(window.WERSJA_SERWISU||'')+' · <a href="https://github.com/mhalaba/poradnik-przetrwania/blob/main/CHANGELOG.md" target="_blank" rel="noopener">historia zmian</a></p><div class="navbtns" style="justify-content:center"><button class="btn primary" id="st">▶ Graj</button><a class="btn ghost" href="szkolenie.html?wersja='+(KIDS?'dzieci':'dorosli')+'">📚 Najpierw szkolenie</a></div></div>'); $('#st').onclick=()=>{ audio(); TR('gra_start',{ukonczone:Object.keys(state.done).length}); close(); wskazowka(); }; }
+function showIntro(){ open('<div id="intro"><div style="font-size:3rem">'+(KIDS?'🧒🎮':'🧭🎮')+'</div><h2>'+T('Rodzina Nowaków: 19 misji przetrwania','Miasteczko Małego Strażnika')+'</h2><p>'+T('Jesteś koordynatorem rodziny: Ania, Zosia (8 l.), dziadek Józef (79 l.) i pies Burek. Dom 300 m od rzeki. Przejdziesz przez wszystkie rozdziały poradnika: od analizy ryzyka, przez zapasy, syreny, ewakuację, blackout i powódź, aż po odbudowę. Każde zadanie wykonujesz naprawdę: idziesz, szukasz, decydujesz, ćwiczysz refleks i oddech.','Mieszkasz z mamą Anią, dziadkiem Józefem i psem Burkiem. Zostaniesz Małym Strażnikiem Bezpieczeństwa: pakujesz plecak, słuchasz syren, budujesz bazę, uciekasz przed wodą na górkę i łapiesz fake newsy. Za każdą misję – gwiazdki i odznaka!')+'</p><p class="small"><b>Wskaźnik spokoju:</b> '+T('złe decyzje podnoszą stres, oddech 4-7-8 go obniża. Panika bywa groźniejsza niż kryzys.','gdy się boisz, oddychaj jak na gorącą zupę – wskaźnik rośnie!')+'</p><p class="small"><b>Sterowanie:</b> WASD / strzałki – ruch · przeciągnij myszą lub Q – obrót kamery · <b>kółko myszy, klawisze + / − lub przyciski z boku – przybliżanie</b> (0 = widok domyślny) · E lub przycisk – działanie.<br>Telefon: joystick po lewej, przeciąganie – kamera, <b>szczypanie dwoma palcami – zoom</b>.</p>'+'<div class="msg"><b>'+T('🧭 Cztery stacje poza misjami','🧭 Cztery stacje do odwiedzenia')+'</b> <ul><li><b>Stacja kompasu</b> – róża wiatrów na południowym zachodzie: azymuty, droga powrotna i marsz w terenie.</li><li><b>Warsztat elektroniki</b> – wiata przy stacji energetycznej: prawo Ohma, zapas energii, budowa obwodu.</li><li><b>Karetka</b> przy punkcie medycznym i <b>hala-drukarka</b> obok szkoły – osobne gry.</li></ul><span class="small">Podejdź i wciśnij E. Stacje działają w dowolnym momencie, niezależnie od misji.</span></div>'+missionList()+'<p class="small" style="opacity:.55;text-align:center;margin-top:14px">Miasteczko '+(window.WERSJA_SERWISU||'')+' · <a href="https://github.com/mhalaba/poradnik-przetrwania/blob/main/CHANGELOG.md" target="_blank" rel="noopener">historia zmian</a></p><div class="navbtns" style="justify-content:center"><button class="btn primary" id="st">▶ Graj</button><a class="btn ghost" href="szkolenie.html?wersja='+(KIDS?'dzieci':'dorosli')+'">📚 Najpierw szkolenie</a></div></div>'); $('#st').onclick=()=>{ audio(); TR('gra_start',{ukonczone:Object.keys(state.done).length}); close(); wskazowka(); }; }
 function showEnd(){ const stars=Object.values(state.done).reduce((a,b)=>a+b,0); TR('gra_ukonczona',{gwiazdki:stars,punkty:state.score,spokoj:Math.round(state.calm)}); open('<div style="text-align:center"><div style="font-size:3.5rem">🏆</div><h2>'+T('Rodzina Nowaków jest gotowa. Ty też.','Jesteś Małym Strażnikiem Bezpieczeństwa!')+'</h2><p>Punkty: <b>'+state.score+'</b> · Gwiazdki: <b>'+stars+'/'+(MISSIONS.length*3)+'</b> · Spokój: <b>'+Math.round(state.calm)+'%</b></p><p>'+T('PRZYGOTOWANIE NIE OZNACZA PANIKI. OZNACZA ODPOWIEDZIALNOŚĆ. Wydrukuj plan rodziny i kartę ICE – wersja cyfrowa to za mało bez prądu.','Pamiętaj: przygotowanie to mądrość i odwaga. Proszenie o pomoc to oznaka siły!')+'</p><p class="small" style="margin-top:22px">Scenariusze misji pochodzą z książki „'+KSIAZKA.tytul+'” '+KSIAZKA.autor+'. Pełne listy kontrolne i szablony są <a href="'+KSIAZKA.sklep+'" target="_blank" rel="noopener">w wydaniu Bezdroży</a>.</p><div class="ad-slot" data-ad="bottom"></div><div class="navbtns" style="justify-content:center"><button class="btn ghost" id="cl">Wracam do miasteczka</button><a class="btn ghost" href="szkolenie.html?wersja='+(KIDS?'dzieci':'dorosli')+'">📚 Szkolenie i certyfikat</a></div></div>'); $('#cl').onclick=close; if(window.renderAds) window.renderAds(); }
 { const hb=$('#helpBtn'); if(hb) hb.onclick=()=>showIntro(); }
 refreshBeacons(); setNight(false); showIntro();
-window.__pp={startMission,MISSIONS,player,camera,close,nextStep,setNight,setDusk,get quest(){return quest;},state,pickups,interact,solids,debug:()=>({camCur:+camCur.toFixed(2),camDist:+camDist.toFixed(2),pitch:+pitch.toFixed(2),camYaw:+camYaw.toFixed(2),camPos:camera.position.toArray().map(n=>+n.toFixed(2)),hit:(()=>{const h=camClear(player.position.x,player.position.y,player.position.z,Math.cos(pitch),camDist);return +h.toFixed(2);})()})};
+window.__pp={startMission,MISSIONS,player,camera,close,nextStep,setNight,setDusk,startMarsz,uruchomStacje,GRY,get quest(){return quest;},state,pickups,interact,solids,debug:()=>({camCur:+camCur.toFixed(2),camDist:+camDist.toFixed(2),pitch:+pitch.toFixed(2),camYaw:+camYaw.toFixed(2),camPos:camera.position.toArray().map(n=>+n.toFixed(2)),hit:(()=>{const h=camClear(player.position.x,player.position.y,player.position.z,Math.cos(pitch),camDist);return +h.toFixed(2);})()})};
 })();

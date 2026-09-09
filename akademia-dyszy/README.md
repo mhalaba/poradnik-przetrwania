@@ -38,7 +38,7 @@ Potem zawartość `/tmp/build/dist/` skopiuj do `akademia-dyszy/` (nadpisując `
 i katalog `assets/`) i dopisz na końcu `index.html`, tuż przed `</body>`:
 
 ```html
-<script src="../assets/analytics.js?v=18"></script>
+<script src="../assets/analytics.js?v=19"></script>
 ```
 
 Ta jedna linijka podpina pomiar i zgodę RODO wspólne dla całej domeny. Numer wersji `?v=` musi

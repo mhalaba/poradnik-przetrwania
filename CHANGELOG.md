@@ -7,6 +7,41 @@ na ekranie powitalnym gry i leci z każdym zdarzeniem pomiaru jako parametr `wyd
 
 ---
 
+## [1.4.0] – 9 września 2026
+
+Dwie nowe stacje szkoleniowe w miasteczku. W odróżnieniu od karetki i hali-drukarki nie prowadzą
+nigdzie dalej — gra dzieje się w panelu i w samym miasteczku.
+
+### Dodane
+
+- **🧭 Stacja kompasu** — róża wiatrów wkopana w ziemię na południowym zachodzie (−30 / −50),
+  z igłą, która naprawdę pokazuje północ tego świata, i czterema kamieniami N/E/S/W.
+  Sześć kroków dla dorosłych: budowa kompasu, nastawianie azymutu na obrotowej tarczy,
+  azymut powrotny, deklinacja magnetyczna, **marsz na azymut w terenie** i orientacja bez sprzętu.
+  Wersja dla dzieci ma cztery kroki i cztery kierunki zamiast pełnej podziałki.
+- **Marsz na azymut** — nowy tryb w świecie 3D. Kompas pojawia się w rogu ekranu: czerwona igła
+  pokazuje północ, żółta strzałka nastawiony azymut, zielony grot kierunek marszu. Nie ma
+  znacznika na mapie — gracz idzie po kompasie, liczy przebyty dystans i sam decyduje, kiedy
+  jest na miejscu. Gra mierzy błąd w metrach i tłumaczy, ile kosztuje jeden stopień odchylenia.
+- **⚡ Warsztat elektroniki** — wiata z ławą, akumulatorem, panelem słonecznym i wielkim
+  rezystorem 470 Ω przy wejściu (paski żółty-fiolet-brąz-złoty, z tabliczką).
+  Sześć kroków dla dorosłych: analogia wodna napięcia i prądu, prawo Ohma, liczenie realnego
+  czasu pracy powerbanku w watogodzinach, łączenie ogniw szeregowo i równolegle,
+  **interaktywne składanie obwodu**, który nie spali diody, oraz bezpieczeństwo zasilania
+  awaryjnego. Wersja dla dzieci: obwód zamknięty, bieguny baterii, przewodniki i gniazdko.
+- Zdarzenie pomiaru `stacja_koniec` z nazwą stacji i liczbą gwiazdek.
+- Wyniki stacji zapisują się osobno od misji (`state.stacje`), a przycisk akcji pokazuje
+  zdobyte gwiazdki. Stacje można powtarzać — kolejność odpowiedzi losuje się na nowo.
+- Zapowiedź stacji na ekranie powitalnym, żeby nie trzeba było ich przypadkiem znaleźć.
+
+### Zmienione
+
+- Nowa tablica `bezRoslin`: miejsca, w których nie rozsiewamy drzew ani trawy, ale gracz może
+  po nich chodzić. Dzięki temu można wejść na różę wiatrów, a nie tylko ją obejść.
+- Hak testowy `window.__pp` udostępnia `startMarsz`, `uruchomStacje` i `GRY`.
+
+---
+
 ## [1.3.0] – 7 września 2026
 
 Pierwsze poprawki po testach z prawdziwym graczem. Gracz zgubił się w miasteczku, nie zdążył

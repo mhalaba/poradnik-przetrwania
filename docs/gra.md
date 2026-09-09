@@ -15,6 +15,7 @@ zakresu poza jednym wyjątkiem opisanym niżej.
 - [Wskaźnik spokoju](#wskaźnik-spokoju)
 - [Sterowanie](#sterowanie)
 - [Jak dodać misję](#jak-dodać-misję)
+- [Stacje](#stacje)
 - [Hak do testów](#hak-do-testów)
 
 ## Świat
@@ -135,13 +136,64 @@ Kamera trzyma się za graczem i cofa się, gdy między nią a graczem stanie śc
 4. Dopisz rozdział w `content.js` i `content-kids.js` — patrz [dokumentacja treści](tresc.md).
 5. Podbij numer `?v=` w plikach HTML.
 
+## Stacje
+
+Stacje to obiekty niezwiązane z 19 misjami z książki: działają w dowolnym momencie i nie ruszają
+postępu misji. Definiuje je tablica `GRY` w `assets/game.js`:
+
+```js
+const GRY={
+  akademia112:{ …, url:'akademia-112/' },      // prowadzi do osobnej gry
+  kompas:{ …, stacja:'kompas' },               // ćwiczenie rozgrywane na miejscu
+  elektronika:{ …, stacja:'elektronika' },
+  dysza:{ …, url:'akademia-dyszy/' }
+};
+```
+
+Wpis z polem `url` otwiera osobną grę w nowej karcie. Wpis z polem `stacja` uruchamia funkcję
+o tej nazwie z `window.STACJE_GRY` — te leżą w [`assets/stacje.js`](../assets/stacje.js), który
+ładuje się **przed** `game.js`.
+
+`game.js` podaje ćwiczeniu zestaw narzędzi:
+
+| Pole | Do czego |
+|---|---|
+| `open`, `close` | panel; otwarcie zatrzymuje ruch gracza |
+| `T(dorosli, dzieci)` | wybór wariantu tekstu |
+| `KIDS` | czy trwa wersja dla dzieci |
+| `beep`, `good`, `bad`, `toast` | dźwięki i komunikat na ekranie |
+| `marsz(cfg, then)` | marsz na azymut w świecie 3D, `then(błąd w metrach)` |
+| `koniec(id, gwiazdki, html)` | zapis wyniku, punkty i ekran końcowy |
+
+Wyniki trzymane są w `state.stacje` (osobno od `state.done` z misjami), więc stację można
+powtarzać bez wpływu na postęp fabuły. `stacje.js` losuje kolejność odpowiedzi przy każdym
+podejściu — dzięki temu powtórka nie sprowadza się do zapamiętania pozycji przycisku.
+
+### Marsz na azymut
+
+Tryb uruchamiany przez `startMarsz(cfg, then)`. Wylicza punkt docelowy z pozycji gracza
+(`dx = d·sin(azymut)`, `dz = −d·cos(azymut)`, bo północ to −Z), pokazuje kompas w rogu ekranu
+i liczy przebyty dystans. **Nie stawia znacznika na mapie** — to jest sedno ćwiczenia. Gracz sam
+decyduje, że doszedł, wciskając E; wtedy `konczMarsz()` mierzy odległość od prawdziwego punktu
+i oddaje ją w metrach.
+
+Kurs gracza liczy `kursGracza()`: `((180 − yaw·180/π) % 360 + 360) % 360`. Tarczę rysuje wspólna
+funkcja `window.KOMPAS_RYSUJ(ctx, rozmiar, {kurs, cel, marsz})` ze `stacje.js` — ta sama, której
+używa panel z suwakiem, więc kompas w ćwiczeniu i kompas w terenie wyglądają identycznie.
+
+### Miejsca bez roślinności
+
+Tablica `bezRoslin` działa jak `colliders`, ale tylko dla rozsiewania drzew i trawy — gracz może
+po tych miejscach chodzić. Powstała dla róży wiatrów, po której trzeba móc przejść.
+
 ## Hak do testów
 
 Na końcu pliku jest jedyne wyjście na zewnątrz:
 
 ```js
-window.__pp = { startMission, MISSIONS, player, camera, close, nextStep,
-                setNight, setDusk, get quest(){…}, state, pickups, interact, solids, debug };
+window.__pp = { startMission, MISSIONS, player, camera, close, nextStep, setNight, setDusk,
+                startMarsz, uruchomStacje, GRY, get quest(){…}, state, pickups, interact,
+                solids, debug };
 ```
 
 Pozwala w konsoli przeskoczyć do misji, przestawić gracza (`__pp.player.position.set(x,0,z)`),

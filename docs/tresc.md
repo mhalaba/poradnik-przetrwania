@@ -97,7 +97,7 @@ gracze testowi zgłaszali, że powtarzana wzmianka wprowadza zamieszanie.
 Podbij numer wersji zasobów, inaczej odwiedzający zobaczą starą treść z pamięci podręcznej:
 
 ```bash
-sed -i '' 's/?v=18/?v=19/g' index.html szkolenie.html gra.html akademia-112/index.html akademia-dyszy/index.html
+sed -i '' 's/?v=19/?v=20/g' index.html szkolenie.html gra.html akademia-112/index.html akademia-dyszy/index.html
 ```
 
 Potem zwykłe `git add -A && git commit && git push` — szczegóły w
