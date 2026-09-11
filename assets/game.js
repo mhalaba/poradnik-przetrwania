@@ -146,12 +146,16 @@ const GRY={
     tytul:'⚡ Warsztat elektroniki',
     opis:'Wiata z ławą warsztatową, panelem słonecznym i wielkim rezystorem przy wejściu. Prawo Ohma, liczenie zapasu energii w watogodzinach, łączenie ogniw szeregowo i równolegle, składanie obwodu, który nie spali diody, oraz zasady, dzięki którym agregat nie zabije nikogo czadem.',
     cta:'Wchodzę do warsztatu →' },
+  laptop:{ key:'stacja_weryfikacji', stacja:'dezinformacja', x:32, z:10, r:5.8, btn:'💻 Stacja weryfikacji',
+    tytul:'💻 Stacja weryfikacji',
+    opis:'Wielki laptop przy drodze do sklepu. Uczysz się rozpoznawać manipulację po technice, a nie po temacie: pośpiech, podszycie się pod źródło, wyrwane z kontekstu zdjęcie, podstawiony ekspert. Wchodzimy przez oszustwa i pieniądze, nie przez politykę. Potem prowadzisz komunikację gminy w czasie fałszywego alarmu i poznajesz rozmowę, w której ktoś proponuje nastolatkowi „łatwe zlecenie”. Na końcu — jak potwierdzić, że coś naprawdę jest prawdą.',
+    cta:'Siadam do laptopa →' },
   dysza:{ key:'akademia_dyszy', url:'akademia-dyszy/', x:24, z:-46, r:6.2, btn:'🖨️ Akademia Dyszy',
     tytul:'🖨️ Akademia Dyszy',
     opis:'Osobna gra-kampus o druku 3D. Lekcje o drukarce, filamencie, fizyce i matematyce wydruku, laboratoria (zużycie nitki, wysokość warstwy, skala, układ współrzędnych), quizy, egzamin i dyplom. Dla uczniów 10–14 lat, program STEAM.',
     cta:'Wchodzę do hali →' }
 };
-const AMB=GRY.akademia112, DYSZA=GRY.dysza, KOMP=GRY.kompas, ELEK=GRY.elektronika;
+const AMB=GRY.akademia112, DYSZA=GRY.dysza, KOMP=GRY.kompas, ELEK=GRY.elektronika, LAPTOP=GRY.laptop;
 if(!state.stacje) state.stacje={};
 
 const HOME=[-20,-30];
@@ -302,6 +306,59 @@ let elekZarowka=null, elekIskra=null;
   g.position.set(ELEK.x,0,ELEK.z); world.add(g);
   colliders.push({x:ELEK.x-6.2,z:ELEK.z-5.2,w:12.4,d:10.4});
   makeLabel('⚡ WARSZTAT ELEKTRONIKI',ELEK.x,8.4,ELEK.z,1,'rgba(70,50,10,.74)',130);
+}
+
+/* ---------- STACJA WERYFIKACJI: wielki laptop ---------- */
+let laptopEkran=null, laptopSwiatlo=null, laptopDioda=null;
+{ const g=new THREE.Group();
+  const obudowa=M(0x9ba3ad,{metalness:.45,roughness:.35}), ciemny=M(0x1b2330,{roughness:.5});
+  const cokol=new THREE.Mesh(new THREE.BoxGeometry(11,.5,8),M(0x8f979f,{roughness:.95}));
+  cokol.position.y=.25; cokol.receiveShadow=true; g.add(cokol);
+  // dolna część z klawiaturą, lekko pochylona do gracza
+  const dol=new THREE.Group(); dol.position.set(0,.95,.6); dol.rotation.x=-.05;
+  const spod=new THREE.Mesh(new THREE.BoxGeometry(9.4,.55,6.4),obudowa); spod.castShadow=true; dol.add(spod);
+  const wglebienie=new THREE.Mesh(new THREE.BoxGeometry(8.4,.12,4.4),ciemny); wglebienie.position.set(0,.3,-.4); dol.add(wglebienie);
+  for(let r=0;r<4;r++) for(let k=0;k<14;k++){
+    const kl=new THREE.Mesh(new THREE.BoxGeometry(.5,.14,.42),M(0x2b3442,{roughness:.6}));
+    kl.position.set(-3.9+k*.6, .4, -1.7+r*.62); dol.add(kl);
+  }
+  const gladzik=new THREE.Mesh(new THREE.BoxGeometry(2.6,.1,1.5),M(0x39424f,{roughness:.4,metalness:.2}));
+  gladzik.position.set(0,.34,1.9); dol.add(gladzik);
+  laptopDioda=new THREE.Mesh(new THREE.SphereGeometry(.13,10,8),new THREE.MeshBasicMaterial({color:0x7fe3c0}));
+  laptopDioda.position.set(4.2,.38,2.5); dol.add(laptopDioda);
+  g.add(dol);
+  // ekran, odchylony do tyłu jak w otwartym laptopie
+  const gora=new THREE.Group(); gora.position.set(0,1.2,-2.4); gora.rotation.x=-1.28;
+  const plecy=new THREE.Mesh(new THREE.BoxGeometry(9.4,6.2,.35),obudowa); plecy.position.y=3.1; plecy.castShadow=true; gora.add(plecy);
+  const ekranT=tex(512,352,(c,w,h)=>{
+    c.fillStyle='#0d1626'; c.fillRect(0,0,w,h);
+    // pasek przeglądarki
+    c.fillStyle='#1b2740'; c.fillRect(0,0,w,62);
+    [26,52,78].forEach((x,i)=>{ c.beginPath(); c.arc(x,31,8,0,6.2832); c.fillStyle=['#e05c5c','#e8c05c','#5ce07f'][i]; c.fill(); });
+    c.fillStyle='#0d1626'; if(c.roundRect){ c.beginPath(); c.roundRect(104,14,w-128,34,17); c.fill(); } else c.fillRect(104,14,w-128,34);
+    c.fillStyle='#7fe3c0'; c.font='bold 22px Nunito, Inter, sans-serif'; c.textAlign='left'; c.textBaseline='middle';
+    c.fillText('🔒  sprawdz-zrodlo', 124, 32);
+    // lupa
+    c.strokeStyle='#ffc857'; c.lineWidth=13; c.lineCap='round';
+    c.beginPath(); c.arc(236,176,58,0,6.2832); c.stroke();
+    c.beginPath(); c.moveTo(278,218); c.lineTo(324,264); c.stroke();
+    // znaczniki tak/nie
+    c.font='bold 46px Nunito, Inter, sans-serif'; c.textAlign='center';
+    c.fillStyle='#5ce07f'; c.fillText('✓', 372, 150);
+    c.fillStyle='#e05c5c'; c.fillText('✗', 372, 210);
+    // podpis
+    c.fillStyle='#e8eefc'; c.font='bold 34px Nunito, Inter, sans-serif';
+    c.fillText('STACJA WERYFIKACJI', w/2, 306);
+  });
+  laptopEkran=new THREE.Mesh(new THREE.PlaneGeometry(8.6,5.6),new THREE.MeshBasicMaterial({map:ekranT}));
+  laptopEkran.position.set(0,3.1,.19); gora.add(laptopEkran);
+  g.add(gora);
+  const zawias=new THREE.Mesh(new THREE.CylinderGeometry(.28,.28,9.4,14),M(0x6f7883,{metalness:.5,roughness:.4}));
+  zawias.rotation.z=Math.PI/2; zawias.position.set(0,1.2,-2.4); g.add(zawias);
+  laptopSwiatlo=new THREE.PointLight(0x9fd0ff,.9,16,2); laptopSwiatlo.position.set(0,3.4,2.4); g.add(laptopSwiatlo);
+  g.position.set(LAPTOP.x,0,LAPTOP.z); g.rotation.y=-.35; world.add(g);
+  colliders.push({x:LAPTOP.x-5.8,z:LAPTOP.z-4.4,w:11.6,d:8.8});
+  makeLabel('💻 STACJA WERYFIKACJI',LAPTOP.x,8.6,LAPTOP.z,1,'rgba(20,35,60,.76)',130);
 }
 box(6,.6,.6,0x6b5a45,24,.3,38).rotation.y=.5; box(5,.6,.6,0x6b5a45,14,.3,40).rotation.y=-.4; { const mud=new THREE.Mesh(new THREE.CircleGeometry(9,24),M(0x5a4a3a)); mud.rotation.x=-Math.PI/2; mud.position.set(18,.035,40); world.add(mud); }
 { const plaza=new THREE.Mesh(new THREE.CircleGeometry(9,28),M(KIDS?0xffe9c2:0x9a9384)); plaza.rotation.x=-Math.PI/2; plaza.position.set(-20,.035,30); world.add(plaza); box(2.4,.5,.8,0x8b5a2b,-24,.7,30); box(2.4,.5,.8,0x8b5a2b,-16,.7,30); makeLabel('PLAC SĄSIEDZKI – MIEJSCE A',-20,5,30,.85,undefined,70); }
@@ -561,6 +618,7 @@ function loop(now){ requestAnimationFrame(loop); if(canvas.width!==Math.floor(in
   pickups.forEach((p,i)=>{ if(!p.taken){ p.mesh.children[0].rotation.y=t*2; p.mesh.children[0].position.y=1+Math.sin(t*3+i)*.15; } });
   { const bl=(Math.sin(t*7)+1)/2; ambLights.forEach((l,i)=>{ l.material.emissiveIntensity=(i?bl:1-bl)*1.6+.15; }); }
   if(elekZarowka){ const puls=.75+Math.sin(t*2.2)*.25; elekZarowka.material.emissiveIntensity=puls*1.4; if(elekIskra) elekIskra.intensity=puls*1.3; }
+  if(laptopSwiatlo){ laptopSwiatlo.intensity=.75+Math.sin(t*1.7)*.2; if(laptopDioda) laptopDioda.visible=(t%2)<1.4; }
   if(dyszaHead){ dyszaHead.position.x=Math.sin(t*.9)*3.4; dyszaHead.position.z=Math.sin(t*.37)*2.6; if(dyszaGantry) dyszaGantry.position.z=dyszaHead.position.z; }
   clouds.forEach(c=>{ c.position.x+=c.userData.v*dt*2; if(c.position.x>180) c.position.x=-180; });
   const pa=riverGeo.attributes.position.array; for(let i=0;i<pa.length;i+=3){ pa[i+2]=Math.sin(riverBase[i]*.15+t*1.5)*.18+Math.cos(riverBase[i+1]*.4+t)*.08; } riverGeo.attributes.position.needsUpdate=true;
@@ -879,7 +937,7 @@ function buildSteps(m){ const ch=DATA[m.id]; const D=[];
 /* ---------- LISTA / INTRO / KONIEC ---------- */
 function missionList(){ return '<div class="missions">'+MISSIONS.map(m=>'<div class="'+(state.done[m.id]?'ok':'')+'">'+m.icon+' '+m.id+'. '+m.name+(state.done[m.id]?' '+'⭐'.repeat(state.done[m.id]):'')+'</div>').join('')+'</div>'; }
 $('#listBtn').onclick=()=>{ if(quest){ open('<h2>Trwa misja</h2><p>'+quest.mission.name+'</p><div class="navbtns"><button class="btn ghost" id="ab">Przerwij misję</button><button class="btn primary" id="cl">Kontynuuj</button></div>'); $('#cl').onclick=close; $('#ab').onclick=()=>{ abortQuest(); close(); }; return; } open('<h2>📋 Misje – rozdziały książki</h2><p class="small">Misje odblokowują się po kolei (złoty znacznik = następna). Zielone – ukończone.</p>'+missionList()+'<div class="navbtns"><button class="btn ghost" id="rs">Zeruj postępy</button><button class="btn primary" id="cl">Zamknij</button></div>'); $('#cl').onclick=close; $('#rs').onclick=()=>{ if(confirm('Wyzerować postępy gry?')){ state={done:{},score:0,calm:80}; save(); refreshBeacons(); close(); } }; };
-function showIntro(){ open('<div id="intro"><div style="font-size:3rem">'+(KIDS?'🧒🎮':'🧭🎮')+'</div><h2>'+T('Rodzina Nowaków: 19 misji przetrwania','Miasteczko Małego Strażnika')+'</h2><p>'+T('Jesteś koordynatorem rodziny: Ania, Zosia (8 l.), dziadek Józef (79 l.) i pies Burek. Dom 300 m od rzeki. Przejdziesz przez wszystkie rozdziały poradnika: od analizy ryzyka, przez zapasy, syreny, ewakuację, blackout i powódź, aż po odbudowę. Każde zadanie wykonujesz naprawdę: idziesz, szukasz, decydujesz, ćwiczysz refleks i oddech.','Mieszkasz z mamą Anią, dziadkiem Józefem i psem Burkiem. Zostaniesz Małym Strażnikiem Bezpieczeństwa: pakujesz plecak, słuchasz syren, budujesz bazę, uciekasz przed wodą na górkę i łapiesz fake newsy. Za każdą misję – gwiazdki i odznaka!')+'</p><p class="small"><b>Wskaźnik spokoju:</b> '+T('złe decyzje podnoszą stres, oddech 4-7-8 go obniża. Panika bywa groźniejsza niż kryzys.','gdy się boisz, oddychaj jak na gorącą zupę – wskaźnik rośnie!')+'</p><p class="small"><b>Sterowanie:</b> WASD / strzałki – ruch · przeciągnij myszą lub Q – obrót kamery · <b>kółko myszy, klawisze + / − lub przyciski z boku – przybliżanie</b> (0 = widok domyślny) · E lub przycisk – działanie.<br>Telefon: joystick po lewej, przeciąganie – kamera, <b>szczypanie dwoma palcami – zoom</b>.</p>'+'<div class="msg"><b>'+T('🧭 Cztery stacje poza misjami','🧭 Cztery stacje do odwiedzenia')+'</b> <ul><li><b>Stacja kompasu</b> – róża wiatrów na południowym zachodzie: azymuty, droga powrotna i marsz w terenie.</li><li><b>Warsztat elektroniki</b> – wiata przy stacji energetycznej: prawo Ohma, zapas energii, budowa obwodu.</li><li><b>Karetka</b> przy punkcie medycznym i <b>hala-drukarka</b> obok szkoły – osobne gry.</li></ul><span class="small">Podejdź i wciśnij E. Stacje działają w dowolnym momencie, niezależnie od misji.</span></div>'+missionList()+'<p class="small" style="opacity:.55;text-align:center;margin-top:14px">Miasteczko '+(window.WERSJA_SERWISU||'')+' · <a href="https://github.com/mhalaba/poradnik-przetrwania/blob/main/CHANGELOG.md" target="_blank" rel="noopener">historia zmian</a></p><div class="navbtns" style="justify-content:center"><button class="btn primary" id="st">▶ Graj</button><a class="btn ghost" href="szkolenie.html?wersja='+(KIDS?'dzieci':'dorosli')+'">📚 Najpierw szkolenie</a></div></div>'); $('#st').onclick=()=>{ audio(); TR('gra_start',{ukonczone:Object.keys(state.done).length}); close(); wskazowka(); }; }
+function showIntro(){ open('<div id="intro"><div style="font-size:3rem">'+(KIDS?'🧒🎮':'🧭🎮')+'</div><h2>'+T('Rodzina Nowaków: 19 misji przetrwania','Miasteczko Małego Strażnika')+'</h2><p>'+T('Jesteś koordynatorem rodziny: Ania, Zosia (8 l.), dziadek Józef (79 l.) i pies Burek. Dom 300 m od rzeki. Przejdziesz przez wszystkie rozdziały poradnika: od analizy ryzyka, przez zapasy, syreny, ewakuację, blackout i powódź, aż po odbudowę. Każde zadanie wykonujesz naprawdę: idziesz, szukasz, decydujesz, ćwiczysz refleks i oddech.','Mieszkasz z mamą Anią, dziadkiem Józefem i psem Burkiem. Zostaniesz Małym Strażnikiem Bezpieczeństwa: pakujesz plecak, słuchasz syren, budujesz bazę, uciekasz przed wodą na górkę i łapiesz fake newsy. Za każdą misję – gwiazdki i odznaka!')+'</p><p class="small"><b>Wskaźnik spokoju:</b> '+T('złe decyzje podnoszą stres, oddech 4-7-8 go obniża. Panika bywa groźniejsza niż kryzys.','gdy się boisz, oddychaj jak na gorącą zupę – wskaźnik rośnie!')+'</p><p class="small"><b>Sterowanie:</b> WASD / strzałki – ruch · przeciągnij myszą lub Q – obrót kamery · <b>kółko myszy, klawisze + / − lub przyciski z boku – przybliżanie</b> (0 = widok domyślny) · E lub przycisk – działanie.<br>Telefon: joystick po lewej, przeciąganie – kamera, <b>szczypanie dwoma palcami – zoom</b>.</p>'+'<div class="msg"><b>'+T('🧭 Pięć stacji poza misjami','🧭 Pięć stacji do odwiedzenia')+'</b> <ul><li><b>Stacja kompasu</b> – róża wiatrów na południowym zachodzie: azymuty, droga powrotna i marsz w terenie.</li><li><b>Warsztat elektroniki</b> – wiata przy stacji energetycznej: prawo Ohma, zapas energii, budowa obwodu.</li><li><b>Stacja weryfikacji</b> – wielki laptop przy drodze do sklepu: jak rozpoznać manipulację i oszustwo.</li><li><b>Karetka</b> przy punkcie medycznym i <b>hala-drukarka</b> obok szkoły – osobne gry.</li></ul><span class="small">Podejdź i wciśnij E. Stacje działają w dowolnym momencie, niezależnie od misji.</span></div>'+missionList()+'<p class="small" style="opacity:.55;text-align:center;margin-top:14px">Miasteczko '+(window.WERSJA_SERWISU||'')+' · <a href="https://github.com/mhalaba/poradnik-przetrwania/blob/main/CHANGELOG.md" target="_blank" rel="noopener">historia zmian</a></p><div class="navbtns" style="justify-content:center"><button class="btn primary" id="st">▶ Graj</button><a class="btn ghost" href="szkolenie.html?wersja='+(KIDS?'dzieci':'dorosli')+'">📚 Najpierw szkolenie</a></div></div>'); $('#st').onclick=()=>{ audio(); TR('gra_start',{ukonczone:Object.keys(state.done).length}); close(); wskazowka(); }; }
 function showEnd(){ const stars=Object.values(state.done).reduce((a,b)=>a+b,0); TR('gra_ukonczona',{gwiazdki:stars,punkty:state.score,spokoj:Math.round(state.calm)}); open('<div style="text-align:center"><div style="font-size:3.5rem">🏆</div><h2>'+T('Rodzina Nowaków jest gotowa. Ty też.','Jesteś Małym Strażnikiem Bezpieczeństwa!')+'</h2><p>Punkty: <b>'+state.score+'</b> · Gwiazdki: <b>'+stars+'/'+(MISSIONS.length*3)+'</b> · Spokój: <b>'+Math.round(state.calm)+'%</b></p><p>'+T('PRZYGOTOWANIE NIE OZNACZA PANIKI. OZNACZA ODPOWIEDZIALNOŚĆ. Wydrukuj plan rodziny i kartę ICE – wersja cyfrowa to za mało bez prądu.','Pamiętaj: przygotowanie to mądrość i odwaga. Proszenie o pomoc to oznaka siły!')+'</p><p class="small" style="margin-top:22px">Scenariusze misji pochodzą z książki „'+KSIAZKA.tytul+'” '+KSIAZKA.autor+'. Pełne listy kontrolne i szablony są <a href="'+KSIAZKA.sklep+'" target="_blank" rel="noopener">w wydaniu Bezdroży</a>.</p><div class="ad-slot" data-ad="bottom"></div><div class="navbtns" style="justify-content:center"><button class="btn ghost" id="cl">Wracam do miasteczka</button><a class="btn ghost" href="szkolenie.html?wersja='+(KIDS?'dzieci':'dorosli')+'">📚 Szkolenie i certyfikat</a></div></div>'); $('#cl').onclick=close; if(window.renderAds) window.renderAds(); }
 { const hb=$('#helpBtn'); if(hb) hb.onclick=()=>showIntro(); }
 refreshBeacons(); setNight(false); showIntro();

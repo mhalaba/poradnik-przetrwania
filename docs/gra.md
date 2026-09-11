@@ -143,9 +143,10 @@ postępu misji. Definiuje je tablica `GRY` w `assets/game.js`:
 
 ```js
 const GRY={
-  akademia112:{ …, url:'akademia-112/' },      // prowadzi do osobnej gry
-  kompas:{ …, stacja:'kompas' },               // ćwiczenie rozgrywane na miejscu
+  akademia112:{ …, url:'akademia-112/' },        // prowadzi do osobnej gry
+  kompas:{ …, stacja:'kompas' },                 // ćwiczenie rozgrywane na miejscu
   elektronika:{ …, stacja:'elektronika' },
+  laptop:{ …, stacja:'dezinformacja' },
   dysza:{ …, url:'akademia-dyszy/' }
 };
 ```
@@ -164,6 +165,20 @@ o tej nazwie z `window.STACJE_GRY` — te leżą w [`assets/stacje.js`](../asset
 | `beep`, `good`, `bad`, `toast` | dźwięki i komunikat na ekranie |
 | `marsz(cfg, then)` | marsz na azymut w świecie 3D, `then(błąd w metrach)` |
 | `koniec(id, gwiazdki, html)` | zapis wyniku, punkty i ekran końcowy |
+
+### Mechaniki dostępne stacjom
+
+Wszystkie leżą w `stacje.js` i są niezależne od `quest`:
+
+| Funkcja | Co robi |
+|---|---|
+| `pytania` | quiz z wyjaśnieniem po każdej odpowiedzi, kolejność opcji losowana |
+| `licz` | zadanie rachunkowe: podpowiedź po pierwszej pomyłce, rozwiązanie po drugiej |
+| `uklad` | wybór jednej opcji w każdym gniazdku, sprawdzenie całości, osobne wyjaśnienie dla każdego błędu |
+| `tarcza` | tarcza kompasu z suwakiem |
+| `triage` | szybka klasyfikacja z zegarem; po czasie karta rozstrzyga się sama |
+| `kryzys` | decyzje ze skutkami widocznymi na wskaźnikach (zaufanie, zasięg, czas) |
+| `czat` | rozmowa na komunikatorze w bańkach, z wyborem odpowiedzi |
 
 Wyniki trzymane są w `state.stacje` (osobno od `state.done` z misjami), więc stację można
 powtarzać bez wpływu na postęp fabuły. `stacje.js` losuje kolejność odpowiedzi przy każdym

@@ -7,6 +7,50 @@ na ekranie powitalnym gry i leci z każdym zdarzeniem pomiaru jako parametr `wyd
 
 ---
 
+## [1.5.0] – 11 września 2026
+
+Trzecia stacja z własnym ćwiczeniem: wielki laptop, a w nim odporność na dezinformację,
+oszustwa i rekrutację przez komunikatory.
+
+### Dodane
+
+- **💻 Stacja weryfikacji** — otwarty laptop na cokole przy drodze do sklepu (32 / 10),
+  z klawiaturą, gładzikiem, mrugającą diodą i świecącym ekranem, na którym widać pasek
+  przeglądarki i lupę. Sześć kroków dla dorosłych, cztery dla dzieci.
+- **Wejście przez pieniądze, nie przez politykę.** Pierwszy krok to fałszywy SMS o dopłacie
+  1,50 zł i telefon „z banku” — ta sama umiejętność chroni portfel i głowę, a rozmowa
+  o oszustwach otwiera drzwi, których „dezinformacja” nie otwiera.
+- **Cztery ruchy na jedną minutę** — jedno narzędzie do zabrania ze sobą: odwrotne szukanie
+  obrazem, adres strony litera po literze, data utworzenia i historia konta, pytanie
+  „kto na tym zyskuje”. Gracz dobiera ruch do sygnału.
+- **Triage z zegarem** (nowa mechanika `triage`) — siedem kart po 20 sekund, gracz nazywa
+  **technikę**, a nie ocenia temat: pośpiech, podszycie się pod źródło, wyrwane z kontekstu,
+  fałszywa dychotomia, podstawiony ekspert, ładunek emocjonalny. Uczymy mechanizmów, bo lista
+  konkretnych fałszywek starzeje się w tygodniach. Po czasie karta sama się rozstrzyga
+  i pokazuje wyjaśnienie.
+- **Rola rzecznika w kryzysie** (nowa mechanika `kryzys`) — fałszywy alarm o skażeniu wody
+  w gminie, cztery decyzje i dwa wskaźniki, które są ze sobą w konflikcie: zaufanie mieszkańców
+  i zasięg fałszu, plus licznik minut. Uczy między innymi tego, że sprostowanie powtarzające
+  kłamstwo w nagłówku utrwala je w pamięci, i że Alert RCB nie służy do gaszenia plotek.
+- **Rozmowa na komunikatorze** (nowa mechanika `czat`) — „łatwe zlecenie”: 200 zł, zdjęcie
+  bramy przy torach, „nikomu nie mów”, a potem paczka i podpalenie. Scenariusz zamyka się
+  **odprawą**: schemat rekrutacji, realne konsekwencje prawne i trzy ruchy do wykonania.
+  To dziś najpilniejszy temat dla polskiej młodzieży.
+- **Krok „jak potwierdzić, że coś JEST prawdą”** — osobno, bo nadmierny lęk kończy się
+  cynizmem „wszyscy kłamią”, a to jest dokładnie cel operacji wpływu. Nieufność wobec
+  wszystkiego to nie odporność, to jej brak.
+- Ekran końcowy daje listę na siedem dni, po jednej rzeczy dziennie, i mówi wprost, żeby
+  wrócić za kilka tygodni — odporność na manipulację słabnie jak każda szczepionka.
+
+### Zmienione
+
+- Mechanizm wyboru w gniazdach (`obwod` z warsztatu elektroniki) uogólniony do wspólnej
+  funkcji `uklad` z konfigurowalnymi napisami — używa jej teraz i składanie obwodu,
+  i dobieranie narzędzi weryfikacji.
+- Ekran powitalny zapowiada pięć stacji zamiast czterech.
+
+---
+
 ## [1.4.0] – 9 września 2026
 
 Dwie nowe stacje szkoleniowe w miasteczku. W odróżnieniu od karetki i hali-drukarki nie prowadzą
