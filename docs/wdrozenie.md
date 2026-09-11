@@ -33,11 +33,11 @@ W panelu home.pl zmień cztery rekordy A subdomeny z powrotem na `46.242.242.147
 
 ## Po edycji plików podbij numer wersji
 
-Odwołania do plików w `assets/` mają na końcu `?v=` i numer (obecnie `?v=20`). Po każdej zmianie
+Odwołania do plików w `assets/` mają na końcu `?v=` i numer (obecnie `?v=21`). Po każdej zmianie
 w `assets/` podnieś ten numer we wszystkich plikach HTML:
 
 ```bash
-sed -i '' 's/?v=20/?v=21/g' index.html szkolenie.html gra.html akademia-112/index.html akademia-dyszy/index.html
+sed -i '' 's/?v=21/?v=22/g' index.html szkolenie.html gra.html akademia-112/index.html akademia-dyszy/index.html
 ```
 
 Bez tego przeglądarki odwiedzających będą jeszcze przez jakiś czas używać starych wersji

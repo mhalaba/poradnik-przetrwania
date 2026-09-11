@@ -7,6 +7,26 @@ na ekranie powitalnym gry i leci z każdym zdarzeniem pomiaru jako parametr `wyd
 
 ---
 
+## [1.5.1] – 11 września 2026
+
+### Dodane
+
+- **Dedykowana grafika tytułowa w stylu retro** (`og-miasteczko.png`, 1200×630) — to ona
+  pokazuje się w podglądzie linku na X, Facebooku i wszędzie tam, gdzie ktoś wkleja adres
+  serwisu. Rysowana kodem, piksel po pikselu: ograniczona paleta, dithering Bayera zamiast
+  płynnego gradientu, własny font bitmapowy 5×7 z polskimi znakami diakrytycznymi,
+  skalowanie całkowitą liczbą razy i delikatne linie obrazu jak na kineskopie.
+  Generator leży w `tools/grafika-og.py` razem z fontem, więc grafikę da się odtworzyć
+  i zmienić — nie jest to plik z generatora obrazów.
+- Opis alternatywny grafiki (`og:image:alt`).
+
+### Zmienione
+
+- Poprzedni obrazek podglądu (`og.png`) usunięty. Nowa nazwa pliku jest celowa: Facebook i X
+  zapamiętują podglądy po adresie, więc zmiana nazwy sprawia, że od razu widzą nową wersję.
+
+---
+
 ## [1.5.0] – 11 września 2026
 
 Trzecia stacja z własnym ćwiczeniem: wielki laptop, a w nim odporność na dezinformację,

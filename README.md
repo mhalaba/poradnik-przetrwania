@@ -49,6 +49,8 @@ pliki HTML, CSS i JavaScript. Postępy zapisują się w pamięci przeglądarki g
 | `assets/logo.png` | logo serwisu, favikona, logo w oknie zgody |
 | `akademia-112/`, `akademia-dyszy/` | dwie osobne gry, każda z własnym README |
 | `ads.txt`, `robots.txt`, `sitemap.xml`, `CNAME` | pliki obsługowe — `CNAME` jest niezbędny |
+| `og-miasteczko.png` | grafika tytułowa do podglądów linku, rysowana kodem |
+| `tools/` | generator tej grafiki i font bitmapowy 5×7 — patrz [`tools/README.md`](tools/README.md) |
 
 ## Jak to jest zrobione
 

@@ -23,7 +23,7 @@
 /* Numer wersji serwisu. Zmieniaj razem z wpisem w CHANGELOG.md.
    Pokazuje się w grze (ekran powitalny) i leci z każdym zdarzeniem pomiaru,
    dzięki czemu w Analytics widać, której wersji dotyczą liczby. */
-window.WERSJA_SERWISU = '1.5.0';
+window.WERSJA_SERWISU = '1.5.1';
 
 window.ANALYTICS = {
   ga4: "G-G61R23XN76",  // usluga "Poradnik przetrwania" w koncie halabaeu
